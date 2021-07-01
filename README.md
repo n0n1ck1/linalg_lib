@@ -22,12 +22,15 @@
 
 ## Как начать работать?
 
-Для начала необходимо установить `git`, `cmake` и `clang`:
+Для начала необходимо установить `ssh`, `git`, `cmake` и `clang`:
 ### Ubuntu
-`$ sudo apt update && sudo apt install git cmake clang`
+`$ sudo apt update && sudo apt install ssh git cmake clang`
 ### MacOS
-`$ brew install git cmake`
+`$ brew install ssh git cmake`
 
+### SSH
+Для удобства стоит сгенерировать ssh ключ и добавить его на GitHub, чтобы не вводить каждый раз логин и пароль.  
+Инструкция по [генерации](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent) и [добавлению](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account) и [проверке](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh/testing-your-ssh-connection).
 
 ### Копирование репозитория
 GitHub не дает сделать сделать приватный fork от публичного репозитория, поэтому нужно будет "перенести" все файлы.  
