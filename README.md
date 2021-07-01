@@ -21,19 +21,69 @@
 
 
 ## Как начать работать?
+
 Для начала необходимо установить `git`, `cmake` и `clang`:
 ### Ubuntu
 `$ sudo apt update && sudo apt install git cmake clang`
 ### MacOS
 `$ brew install git cmake`
 
-Скачать проект:
+
+### Копирование репозитория
+GitHub не дает сделать сделать приватный fork от публичного репозитория, поэтому нужно будет "перенести" все файлы.  
+1. Создайте репозиторий с названием parallel-cpp у себя на GitHub. На этапе создания сделайте его приватным, больше ничего выставлять не нужно.
+2. Скачайте репозиторий:
 ```
-$ git clone git@github.com:<login>/parallel-cpp.git
-$ cd parallel-cpp
+$ git clone --bare git@github.com:maxkuzn/parallel-cpp.git
+```
+3. Сделайте mirror-push:
+```
+$ cd parallel-cpp.git
+$ git push --mirror git@github.com:<your_login>/parallel-cpp.git
+```
+4. Удалите репозиторий:
+```
+$ cd ..
+$ rm -rf parallel-cpp.git
+```
+5. Скачайте свой репозиторий:
+```
+$ git clone git@github.com:<your_login>/parallel-cpp.git
 ```
 
-Собрать проект:
+### Организационное
+В настройках репозитория на сайте добавите в коллаборацию пользователя `maxkuzn`.
+Также заполните [форму](https://docs.google.com/forms/d/e/1FAIpQLSfz9bU1kAajYbmtqr2ZISsQpPqiNDBUHx0u1uSkAG454AxZkg/viewform?usp=sf_link).
+
+### Подготовка для сдачи задач
+После изменения файлов, их необходимо добавить на GitHub. Для этого нужно перейти в директорию с репозиторием и выполнить:
+1. Создать ветку с решениями:
+```
+$ git checkout -b solutions
+```
+2. Дать GitHub'у информацию о ее существовании:
+```
+$ git push --set-upstream origin solutions
+```
+3. После первого коммита (см. далее) сделать pull request на сайте - нажать большую кнопу "Compare & pull request". Далее добавить в reviewers пользователя `maxkuzn` и нажать "Create pull request". **НЕ НАЖИМАТЬ** кнопку "Merge pull request".
+
+Данные действия нужно выполнить единожды, больше этого делать не нужно.
+
+### Сдача задач
+1. Добавить измененные файлы в коммит (например, для задачи is_prime):
+```
+$ git add is_prime/is_prime.h
+```
+2. Создать коммит:
+```
+$ git commit -m "Some informative message"
+```
+3. "Залить" коммит на GitHub (не забудьте создать ветку из пункта "Подготовка для сдачи задач"):
+```
+$ git push
+```
+
+### Сборка
 ```
 $ mkdir build
 $ cd build
