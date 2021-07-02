@@ -116,7 +116,7 @@ Make непосредственно компилирует и собирает �
 ```
 $ mkdir tsan_build
 $ cd tsan_build
-$ [СС="clang" CXX="clang++"] cmake -DTSAN ..
+$ [СС="clang" CXX="clang++"] cmake -DTSAN=ON ..
 $ make [-j [N]]
 ```
 
