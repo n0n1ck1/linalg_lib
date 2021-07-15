@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(parallel-cpp)
+project(linalg_lib)
 
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -58,26 +58,6 @@ enable_testing()
 add_subdirectory(util)
 
 # PS 0
-add_subdirectory(is_prime)
+add_subdirectory(matrix)
 
-# PS 1
-add_subdirectory(hello_world)
-add_subdirectory(reduce)
-add_subdirectory(deadlock)
-add_subdirectory(philosophers)
-
-# PS 2
-add_subdirectory(thread_safe_queue)
-add_subdirectory(thread_safe_vector)
-add_subdirectory(unbuffered_channel)
-
-# PS 3
-add_subdirectory(spin_lock)
-add_subdirectory(rw_spin_lock)
-add_subdirectory(ticket_lock)
-add_subdirectory(mcs_lock)
-
-# PS 4
-add_subdirectory(mpsc_queue)
-add_subdirectory(mpmc_queue)
 

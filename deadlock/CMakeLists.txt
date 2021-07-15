@@ -1,2 +1,0 @@
-register_test(deadlock)
-
