@@ -1,7 +1,7 @@
-#include "timeout_guard.h"
+#include "util/timeout_guard.h"
 #include <gtest/gtest.h>
 
-#include "matrix.h"
+#include "../matrix/matrix.h"
 
 TEST(Matrix, Generation) {
     TimeoutGuard guard(1s);
