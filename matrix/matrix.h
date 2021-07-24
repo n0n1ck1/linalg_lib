@@ -4,7 +4,6 @@
 #include<thread>
 #include<iostream>
 #include<exception>
-//#include<barrier>
 
 template <typename T>
 class Matrix {
