@@ -34,3 +34,10 @@ TEST(Matrix, BigMultiplication) {
   Matrix<int> expected = 6 * eye;
   ASSERT_EQ(doubled_eye * tripled_eye, expected);
 }
+
+TEST(Matrix, Addition) {
+  Matrix<int> matrix_1({{1, 2, 3}, {3, 2, 1}});
+  Matrix<int> matrix_2({{3, 2, 1}, {1, 2, 3}});
+  Matrix<int> expected({{4, 4, 4}, {4, 4, 4}});
+  ASSERT_EQ(matrix_1 + matrix_2, expected);
+}

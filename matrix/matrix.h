@@ -60,17 +60,12 @@ public:
     bool operator==(const Matrix& other) const {
         return matrix_ == other.matrix_;
     }
-    Matrix& operator+(const Matrix& other) {
-        std::vector<std::thread> threads;
+    Matrix operator+(const Matrix& other) {
         Matrix res(length_, width_);
-        for (size_t i = 0; i < length_; ++i) {
-            for (size_t j = 0; j < width_; ++j) {
-                res(i, j) = matrix_[i * width_ + j] + other(i, j);
-            }
+        for (size_t i = 0; i < width_ * length_; ++i) {
+            res.matrix_[i] = matrix_[i] + other.matrix_[i];
         }
-        for (auto& t : threads) {
-            t.join();
-        }
+        return res;
     }
 private:
     std::vector<T> matrix_;
