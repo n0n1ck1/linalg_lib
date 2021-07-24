@@ -65,9 +65,7 @@ public:
         Matrix res(length_, width_);
         for (size_t i = 0; i < length_; ++i) {
             for (size_t j = 0; j < width_; ++j) {
-                threads.emplace_back([&]{
-                    res(i, j) += matrix_(i, j) + other(i, j);
-                });
+                res(i, j) = matrix_[i * width_ + j] + other(i, j);
             }
         }
         for (auto& t : threads) {
@@ -92,23 +90,4 @@ std::ostream& operator<<(std::ostream& out, const Matrix<T>& matrix) {
         out << "\n";
     }
     return out;
-}
-
-template<typename T>
-Matrix<T> operator*(Matrix<T> left, Matrix<T> right) {
-    Matrix<T> res(left.GetLength(), right.GetWidth());
-    std::vector<std::thread> threads;
-    for (size_t i = 0; i < left.GetLength(); ++i) {
-        for (size_t j = 0; j < right.GetWidth(); ++j) {
-            threads.emplace_back([&] {
-                for (size_t k = 0; k < left.GetWidth(); ++k) {
-                    res(i, j) += left(i, k) * right(k, j);
-                }
-            });
-        }
-    }
-    for (auto& t : threads) {
-        t.join();
-    }
-    return res;
 }
