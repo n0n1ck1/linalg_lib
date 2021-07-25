@@ -24,7 +24,7 @@ TEST(Matrix, SimpleMultiplication) {
   Matrix<int> matrix_right(right);
   std::vector<std::vector<int>> expected = {{22, 24, 26, 28}, {52, 57, 62, 67}};
   Matrix<int> matrix_expected(expected);
-  ASSERT_EQ(matrix_left * matrix_right, matrix_expected);
+  ASSERT_EQ(dot(matrix_left, matrix_right), matrix_expected);
 }
 
 TEST(Matrix, BigMultiplication) {
@@ -40,4 +40,11 @@ TEST(Matrix, Addition) {
   Matrix<int> matrix_2({{3, 2, 1}, {1, 2, 3}});
   Matrix<int> expected({{4, 4, 4}, {4, 4, 4}});
   ASSERT_EQ(matrix_1 + matrix_2, expected);
+}
+
+TEST(Matrix, SLE1) {
+  Matrix<double> matrix_1({{2, -4, 1, -5}, {4, -7, -1, -8}, {10, -18, 2, -23}, {2, -3, 1, -1}});
+  Matrix<double> matrix_2({{2}, {-5}, {3}, {0}});
+  Matrix<double> expected({{1}, {2}, {3}, {-1}});
+  ASSERT_EQ(sle_solution(matrix_1, matrix_2), expected);
 }
