@@ -214,3 +214,67 @@ Matrix<T> sle_solution(const Matrix<T> &left_part, const Matrix<T> right_part) {
 
   return sle_matrix.get_submatrix(0, left_width - 1, left_width, left_width + right_width - 1);
 }
+
+
+
+template<typename T>
+T det(Matrix<T> matrix) {
+  size_t width = matrix.GetWidth();
+  size_t length = matrix.GetLength();
+  if (width != length) {
+    throw "The matrix isn't a square";
+    return static_cast<T>(0);
+  }
+  // std::cout << "a";
+  T res = static_cast<T>(1);
+  size_t n_threads = 2;
+  for (size_t i = 0; i < width - 1; ++i) {
+    std::vector<std::thread> threads;
+    threads.reserve(n_threads);
+    if (matrix(i, i) == static_cast<T>(0)) {
+      bool has_non_zero = false;
+      size_t index_non_zero;
+      for (size_t k = 0; k < n_threads; ++k) {
+        threads.emplace_back([k, &matrix, &has_non_zero, &index_non_zero, &i, &width, &n_threads]{
+          // divide the rows in range [i, width] evenly between all threads
+          for (size_t j = i + k * (width - i ) / n_threads; j < i + (k + 1) * (width - i) / n_threads; ++j) {
+            if (matrix(j, i) != 0) {
+              has_non_zero = true;
+              index_non_zero = j;
+              return;
+            }
+          }
+        });
+      }
+      for (auto& t : threads) {
+        t.join();
+      }
+      if (!has_non_zero) {
+        return static_cast<T>(0);
+      }
+      matrix.row_switching(i, index_non_zero);
+      res *= static_cast<T>(-1);
+    }
+    threads.clear();
+    // the same as above, except the first thread mustn't have the i-th row in it
+    threads.emplace_back([&matrix, &width, &n_threads, &i] {
+      for (size_t j = i + 1; j < i + (width - i) / n_threads; ++j) {
+        matrix.row_addition(j, i, static_cast<T>(-1) * matrix(j, i) / matrix(i, i));
+      }
+    });
+    for (size_t k = 1; k < n_threads; ++k) {
+      threads.emplace_back([k, &matrix, &width, &n_threads, &i] {
+        for (size_t j = i + k * (width - i) / n_threads; j < i + (k + 1) * (width - i) / n_threads; ++j) {
+          matrix.row_addition(j, i, static_cast<T>(-1) * matrix(j, i) / matrix(i, i));
+        }
+      });
+    }
+    for (auto& t : threads) {
+        t.join();
+    }
+  }
+  for (size_t i = 0; i < width; ++i) {
+    res *= matrix(i, i);
+  }
+  return res;
+}

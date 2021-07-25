@@ -48,3 +48,16 @@ TEST(Matrix, SLE1) {
   Matrix<double> expected({{1}, {2}, {3}, {-1}});
   ASSERT_EQ(sle_solution(matrix_1, matrix_2), expected);
 }
+
+TEST(Matrix, SimpleDeterminant) {
+  Matrix<double> matrix({{1, 2, 3, 4},
+                        {4, 3, 2, 1},
+                        {2, 3, 4, 6},
+                        {4, 2, 1, 3}});
+  ASSERT_EQ(det(matrix), 5);
+}
+
+TEST(Matrix, BigDeterminant) {
+  Matrix<double> matrix = diag(1.0, 1000);
+  ASSERT_EQ(det(matrix), 1);
+}
