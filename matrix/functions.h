@@ -109,19 +109,22 @@ Matrix<T> dot(const Matrix<T>& left, Matrix<T> right) {
   if (!(left.GetWidth() == right.GetLength())) {
     throw std::length_error("Left width (" + std::to_string(left.GetWidth()) + ") and right length (" + std::to_string(right.GetLength()) + ") are not equal.");
   }
+  size_t n_threads = 2;
   size_t width = right.GetWidth();
   size_t length = left.GetLength();
   size_t count_iter = left.GetWidth();
   Matrix<T> res(length, width);
   std::vector<std::thread> threads;
-  for (size_t i = 0; i < length; ++i) {
-    for (size_t j = 0; j < width; ++j) {
-      threads.emplace_back([&](size_t x, size_t y) {
-        for (size_t k = 0; k < count_iter; ++k) {
-          res(x, y) += left(x, k) * right(k, y);
+  for (size_t k = 0; k < n_threads; ++k) {
+    threads.emplace_back([k, &res, &left, &right, &count_iter, &width, &length, &n_threads] {
+      for (size_t i = k * width / n_threads; i < (k + 1) * width / n_threads; ++i) {
+        for (size_t j = 0; j < length; ++j) {
+          for (size_t p = 0; p < count_iter; ++p) {
+            res(j, i) += left(j, p) * right(p, i);
+          }
         }
-      }, i, j);
-    }
+      }
+    });
   }
   for (auto& t : threads) {
       t.join();
