@@ -231,16 +231,16 @@ Matrix<T> inverse(const Matrix<T>& matrix) {
       size_t index_non_zero;
       threads.clear();
       for (size_t k = 0; k < n_threads; ++k) {
-        threads.emplace_back([k, &sle, &has_non_zero, &index_non_zero, &i, &width, &n_threads]{
+        threads.emplace_back([&](const size_t& id) {
           // divide the rows in range [i, width] evenly between all threads
-          for (size_t j = i + k * (width - i ) / n_threads; j < i + (k + 1) * (width - i) / n_threads; ++j) {
+          for (size_t j = i + id * (width - i ) / n_threads; j < i + (id + 1) * (width - i) / n_threads; ++j) {
             if (sle(j, i) != 0) {
               has_non_zero = true;
               index_non_zero = j;
               return;
             }
           }
-        });
+        }, k);
       }
       for (auto& t : threads) {
         t.join();
@@ -253,17 +253,17 @@ Matrix<T> inverse(const Matrix<T>& matrix) {
     }
     threads.clear();
     // the same as above, except the first thread mustn't have the i-th row in it
-    threads.emplace_back([&sle, &width, &n_threads, &i] {
+    threads.emplace_back([&] {
       for (size_t j = i + 1; j < i + (width - i) / n_threads; ++j) {
         sle.row_addition(j, i, static_cast<T>(-1) * sle(j, i) / sle(i, i));
       }
     });
     for (size_t k = 1; k < n_threads; ++k) {
-      threads.emplace_back([k, &sle, &width, &n_threads, &i] {
-        for (size_t j = std::max(i + k * (width - i) / n_threads, i + 1); j < i + (k + 1) * (width - i) / n_threads; ++j) {
+      threads.emplace_back([&](const size_t& id) {
+        for (size_t j = std::max(i + id * (width - i) / n_threads, i + 1); j < i + (id + 1) * (width - i) / n_threads; ++j) {
           sle.row_addition(j, i, static_cast<T>(-1) * sle(j, i) / sle(i, i));
         }
-      });
+      }, k);
     }
     for (auto& t : threads) {
       t.join();
@@ -277,11 +277,11 @@ Matrix<T> inverse(const Matrix<T>& matrix) {
     sle.row_multiplication(i, 1 / sle(i, i));
     threads.clear();
     for (size_t k = 0; k < n_threads; ++k) {
-      threads.emplace_back([k, &sle, &i, &n_threads] {
-        for (size_t j = k * i / n_threads; j < (k + 1) * i / n_threads; ++j) {
+      threads.emplace_back([&](const size_t& id) {
+        for (size_t j = id * i / n_threads; j < (id + 1) * i / n_threads; ++j) {
           sle.row_addition(j, i, -sle(j, i));
         }
-      });
+      }, k);
     }
     for (auto& t : threads) {
       t.join();
