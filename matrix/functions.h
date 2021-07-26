@@ -114,18 +114,6 @@ Matrix<T> dot(const Matrix<T>& left, Matrix<T> right) {
   size_t count_iter = left.GetWidth();
   Matrix<T> res(length, width);
   std::vector<std::thread> threads;
-<<<<<<< HEAD
-  for (size_t k = 0; k < n_threads; ++k) {
-    threads.emplace_back([&](const size_t& id) {
-      for (size_t i = id * width / n_threads; i < (id + 1) * width / n_threads; ++i) {
-        for (size_t j = 0; j < length; ++j) {
-          for (size_t p = 0; p < count_iter; ++p) {
-            res(j, i) += left(j, p) * right(p, i);
-          }
-        }
-      }
-    }, k);
-=======
   for (size_t i = 0; i < length; ++i) {
     for (size_t j = 0; j < width; ++j) {
       threads.emplace_back([&](size_t x, size_t y) {
@@ -134,7 +122,6 @@ Matrix<T> dot(const Matrix<T>& left, Matrix<T> right) {
         }
       }, i, j);
     }
->>>>>>> parent of f27bc25... Merge branch 'inverse' of github.com:n0n1ck1/linalg_lib into inverse
   }
   for (auto& t : threads) {
       t.join();
