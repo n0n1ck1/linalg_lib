@@ -214,3 +214,78 @@ Matrix<T> sle_solution(const Matrix<T> &left_part, const Matrix<T> right_part) {
 
   return sle_matrix.get_submatrix(0, left_width - 1, left_width, left_width + right_width - 1);
 }
+
+template<typename T>
+Matrix<T> inverse(const Matrix<T>& matrix) {
+  if (matrix.GetWidth() != matrix.GetLength()) {
+    throw "The matrix ins't a square";
+    return Matrix<T>();
+  }
+  size_t width = matrix.GetWidth();
+  Matrix<T> sle = concatenate(matrix, diag(1.0, width), 1);
+  size_t n_threads = 2;
+  std::vector<std::thread> threads;
+  for (size_t i = 0; i < width - 1; ++i) {
+    if (sle(i, i) == static_cast<T>(0)) {
+      bool has_non_zero = false;
+      size_t index_non_zero;
+      threads.clear();
+      for (size_t k = 0; k < n_threads; ++k) {
+        threads.emplace_back([k, &sle, &has_non_zero, &index_non_zero, &i, &width, &n_threads]{
+          // divide the rows in range [i, width] evenly between all threads
+          for (size_t j = i + k * (width - i ) / n_threads; j < i + (k + 1) * (width - i) / n_threads; ++j) {
+            if (sle(j, i) != 0) {
+              has_non_zero = true;
+              index_non_zero = j;
+              return;
+            }
+          }
+        });
+      }
+      for (auto& t : threads) {
+        t.join();
+      }
+      if (!has_non_zero) {
+        throw "Determinant equals 0, inverse matrix doesn't exist";
+        return Matrix<T>();
+      }
+      sle.row_switching(i, index_non_zero);
+    }
+    threads.clear();
+    // the same as above, except the first thread mustn't have the i-th row in it
+    threads.emplace_back([&sle, &width, &n_threads, &i] {
+      for (size_t j = i + 1; j < i + (width - i) / n_threads; ++j) {
+        sle.row_addition(j, i, static_cast<T>(-1) * sle(j, i) / sle(i, i));
+      }
+    });
+    for (size_t k = 1; k < n_threads; ++k) {
+      threads.emplace_back([k, &sle, &width, &n_threads, &i] {
+        for (size_t j = std::max(i + k * (width - i) / n_threads, i + 1); j < i + (k + 1) * (width - i) / n_threads; ++j) {
+          sle.row_addition(j, i, static_cast<T>(-1) * sle(j, i) / sle(i, i));
+        }
+      });
+    }
+    for (auto& t : threads) {
+      t.join();
+    }
+  }
+  if (sle(width - 1, width - 1) == 0) {
+    throw "Determinant equals 0, inverse matrix doesn't exist";
+    return Matrix<T>();
+  }
+  for (long long int i = width - 1; i >= 0; --i) {
+    sle.row_multiplication(i, 1 / sle(i, i));
+    threads.clear();
+    for (size_t k = 0; k < n_threads; ++k) {
+      threads.emplace_back([k, &sle, &i, &n_threads] {
+        for (size_t j = k * i / n_threads; j < (k + 1) * i / n_threads; ++j) {
+          sle.row_addition(j, i, -sle(j, i));
+        }
+      });
+    }
+    for (auto& t : threads) {
+      t.join();
+    }
+  }
+  return sle.get_submatrix(0, width - 1, width, 2 * width - 1);
+}

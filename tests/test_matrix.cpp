@@ -48,3 +48,25 @@ TEST(Matrix, SLE1) {
   Matrix<double> expected({{1}, {2}, {3}, {-1}});
   ASSERT_EQ(sle_solution(matrix_1, matrix_2), expected);
 }
+
+TEST(Matrix, SimpleInverse) {
+  Matrix<double> matrix({{1.0, 2.0, 3.0, 4.0},
+                         {4.0, 3.0, 2.0, 1.0},
+                         {2.0, 3.0, 4.0, 6.0},
+                         {4.0, 2.0, 1.0, 3.0}});
+  Matrix<double> expected({{3.8, -0.2, -3.0, 1.0},
+                           {-9.2, 0.8, 7.0, -2.0},
+                           {6.8, -0.2, -5.0, 1.0},
+                           {-1.2, -0.2, 1.0, 0.0}});
+  //std::cout << (inverse(matrix).matrix_ == expected.matrix_);
+  //for (auto x : inverse(matrix).matrix_) {
+  //  std::cout << x << " ";
+  //}
+  //std::cout << inverse(matrix).GetWidth() <<" " <<inverse(matrix).GetLength();
+  //std::cout << "\n";
+  //for (auto x : expected.matrix_) {
+//    std::cout << x << " ";
+  //}
+  //std::cout << expected.width_ << " " <<expected.length_;
+  ASSERT_EQ(inverse(matrix), expected);
+}
