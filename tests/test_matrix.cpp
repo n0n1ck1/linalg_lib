@@ -58,15 +58,16 @@ TEST(Matrix, SimpleInverse) {
                            {-9.2, 0.8, 7.0, -2.0},
                            {6.8, -0.2, -5.0, 1.0},
                            {-1.2, -0.2, 1.0, 0.0}});
-  //std::cout << (inverse(matrix).matrix_ == expected.matrix_);
-  //for (auto x : inverse(matrix).matrix_) {
-  //  std::cout << x << " ";
-  //}
-  //std::cout << inverse(matrix).GetWidth() <<" " <<inverse(matrix).GetLength();
-  //std::cout << "\n";
-  //for (auto x : expected.matrix_) {
-//    std::cout << x << " ";
-  //}
-  //std::cout << expected.width_ << " " <<expected.length_;
+  Matrix<double> inv = inverse(matrix);
+  for (size_t i = 0; i < inv.GetLength(); ++i) {
+    for (size_t j = 0; j < inv.GetWidth(); ++j) {
+      ASSERT_NEAR(inv(i, j), expected(i, j), 1e-7);
+    }
+  }
+}
+
+TEST(Matrix, BigInverse) {
+  Matrix<double> matrix = diag(2.0, 500);
+  Matrix<double> expected = diag(0.5, 500);
   ASSERT_EQ(inverse(matrix), expected);
 }
