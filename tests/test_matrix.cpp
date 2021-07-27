@@ -53,42 +53,78 @@ TEST(Matrix, SimpleSle_3_inf) {
   Matrix<double> matrix_1({{2, -3, 1}, {3, -5, 5}, {5, -8, 6}});
   Matrix<double> matrix_2({{2}, {3}, {5}});
   Matrix<double> expected(0, 0);
-  ASSERT_EQ(sle_solution(matrix_1, matrix_2), expected);
+  Matrix<double> res = sle_solution(matrix_1, matrix_2);
+  ASSERT_EQ(res.GetShape(), expected.GetShape());
+  for (size_t i = 0; i < res.GetLength(); ++i) {
+    for (size_t j = 0; j < res.GetWidth(); ++j) {
+      ASSERT_NEAR(res(i, j), expected(i, j), 1e-10);
+    }
+  }
 }
 
 TEST(Matrix, SimpleSle_3_no_solution) {
   Matrix<double> matrix_1({{5, -6, 1}, {3, -5, -2}, {2, -1, 3}});
   Matrix<double> matrix_2({{4}, {3}, {5}});
   Matrix<double> expected(0, 0);
-  ASSERT_EQ(sle_solution(matrix_1, matrix_2), expected);
+  Matrix<double> res = sle_solution(matrix_1, matrix_2);
+  ASSERT_EQ(res.GetShape(), expected.GetShape());
+  for (size_t i = 0; i < res.GetLength(); ++i) {
+    for (size_t j = 0; j < res.GetWidth(); ++j) {
+      ASSERT_NEAR(res(i, j), expected(i, j), 1e-10);
+    }
+  }
 }
 
 TEST(Matrix, SimpleSle_3) {
   Matrix<double> matrix_1({{2, 3, 5}, {3, 7, 4}, {1, 2, 2}});
   Matrix<double> matrix_2({{10}, {3}, {3}});
   Matrix<double> expected({{3}, {-2}, {2}});
-  ASSERT_EQ(sle_solution(matrix_1, matrix_2), expected);
+  Matrix<double> res = sle_solution(matrix_1, matrix_2);
+  ASSERT_EQ(res.GetShape(), expected.GetShape());
+  for (size_t i = 0; i < res.GetLength(); ++i) {
+    for (size_t j = 0; j < res.GetWidth(); ++j) {
+      ASSERT_NEAR(res(i, j), expected(i, j), 1e-10);
+    }
+  }
 }
 
 TEST(Matrix, SimpleSle_4){
   Matrix<double> matrix_1({ {3, -2, -5, 1}, {2, -3, 1, 5}, {1, 2, 0, -4}, {1, -1, -4, 9 } });
   Matrix<double> matrix_2({ {3}, {-3}, {-3}, {22} });
   Matrix<double> expected({ {-1}, {3}, {-2}, {2} });
-  ASSERT_EQ(sle_solution(matrix_1, matrix_2), expected);
+  Matrix<double> res = sle_solution(matrix_1, matrix_2);
+  ASSERT_EQ(res.GetShape(), expected.GetShape());
+  for (size_t i = 0; i < res.GetLength(); ++i) {
+    for (size_t j = 0; j < res.GetWidth(); ++j) {
+      ASSERT_NEAR(res(i, j), expected(i, j), 1e-10);
+    }
+  }
 }
 
 TEST(Matrix, SimpleSle_5){
   Matrix<double> matrix_1({ {1, 1, 4, 4, 9}, {2, 2, 17, 17, 82}, {2, 0, 3, -1, 4}, {0, 1, 4, 12, 27}, {1, 2, 2, 10, 0} });
   Matrix<double> matrix_2({ {-9}, {-146}, {-10}, {-26}, {37} });
   Matrix<double> expected({ {5}, {4}, {-3}, {3}, {-2} });
-  ASSERT_EQ(sle_solution(matrix_1, matrix_2), expected);
+  Matrix<double> res = sle_solution(matrix_1, matrix_2);
+  ASSERT_EQ(res.GetShape(), expected.GetShape());
+  for (size_t i = 0; i < res.GetLength(); ++i) {
+    for (size_t j = 0; j < res.GetWidth(); ++j) {
+      ASSERT_NEAR(res(i, j), expected(i, j), 1e-10);
+    }
+  }
 }
 
 TEST(Matrix, SimpleSle_5_dif_shape){
   Matrix<double> matrix_1({ {1, 1, 4, 4, 9}, {2, 2, 17, 17, 82}, {2, 0, 3, -1, 4}, {0, 1, 4, 12, 27}, {1, 2, 2, 10, 0}, {2, 2, 8, 8, 18} });
   Matrix<double> matrix_2({ {-9}, {-146}, {-10}, {-26}, {37}, {-18} });
   Matrix<double> expected({ {5}, {4}, {-3}, {3}, {-2} });
-  ASSERT_EQ(sle_solution(matrix_1, matrix_2), expected);
+  Matrix<double> res = sle_solution(matrix_1, matrix_2);
+  ASSERT_EQ(res.GetShape(), expected.GetShape());
+  for (size_t i = 0; i < res.GetLength(); ++i) {
+    for (size_t j = 0; j < res.GetWidth(); ++j) {
+      ASSERT_NEAR(res(i, j), expected(i, j), 1e-10);
+    }
+  }
 }
 
 TEST(Matrix, SimpleSle_big){
@@ -111,7 +147,13 @@ TEST(Matrix, SimpleSle_big){
       big_matrix.row_switching(i, size - 1 - i);
       big_matrix_res.row_switching(i, size - 1 - i);
   }
-  ASSERT_EQ(sle_solution(big_matrix, big_matrix_res), expected);
+  Matrix<double> res = sle_solution(big_matrix, big_matrix_res);
+  ASSERT_EQ(res.GetShape(), expected.GetShape());
+  for (size_t i = 0; i < res.GetLength(); ++i) {
+    for (size_t j = 0; j < res.GetWidth(); ++j) {
+      ASSERT_NEAR(res(i, j), expected(i, j), 1e-10);
+    }
+  }
 }
 
 TEST(Matrix, SimpleSle_large){
@@ -134,14 +176,26 @@ TEST(Matrix, SimpleSle_large){
       big_matrix.row_switching(i, size - 1 - i);
       big_matrix_res.row_switching(i, size - 1 - i);
   }
-  ASSERT_EQ(sle_solution(big_matrix, big_matrix_res), expected);
+  Matrix<double> res = sle_solution(big_matrix, big_matrix_res);
+  ASSERT_EQ(res.GetShape(), expected.GetShape());
+  for (size_t i = 0; i < res.GetLength(); ++i) {
+    for (size_t j = 0; j < res.GetWidth(); ++j) {
+      ASSERT_NEAR(res(i, j), expected(i, j), 1e-10);
+    }
+  }
 }
 
 TEST(Matrix, SimpleSle_zero) {
   Matrix<double> matrix_1({{0, 0, 0}, {0, 0, 0}, {0, 0, 0}});
   Matrix<double> matrix_2({{0}, {0}, {0}});
   Matrix<double> expected(0, 0);
-  ASSERT_EQ(sle_solution(matrix_1, matrix_2), expected);
+  Matrix<double> res = sle_solution(matrix_1, matrix_2);
+  ASSERT_EQ(res.GetShape(), expected.GetShape());
+  for (size_t i = 0; i < res.GetLength(); ++i) {
+    for (size_t j = 0; j < res.GetWidth(); ++j) {
+      ASSERT_NEAR(res(i, j), expected(i, j), 1e-10);
+    }
+  }
 }
 
 
@@ -151,42 +205,78 @@ TEST(Matrix, ParallelSle_3_inf) {
   Matrix<double> matrix_1({{2, -3, 1}, {3, -5, 5}, {5, -8, 6}});
   Matrix<double> matrix_2({{2}, {3}, {5}});
   Matrix<double> expected(0, 0);
-  ASSERT_EQ(parallel_sle_solution_similar_simple(matrix_1, matrix_2), expected);
+  Matrix<double> res = parallel_sle_solution_similar_simple(matrix_1, matrix_2);
+  ASSERT_EQ(res.GetShape(), expected.GetShape());
+  for (size_t i = 0; i < res.GetLength(); ++i) {
+    for (size_t j = 0; j < res.GetWidth(); ++j) {
+      ASSERT_NEAR(res(i, j), expected(i, j), 1e-10);
+    }
+  }
 }
 
 TEST(Matrix, ParallelSle_3_no_solution) {
   Matrix<double> matrix_1({{5, -6, 1}, {3, -5, -2}, {2, -1, 3}});
   Matrix<double> matrix_2({{4}, {3}, {5}});
   Matrix<double> expected(0, 0);
-  ASSERT_EQ(parallel_sle_solution_similar_simple(matrix_1, matrix_2), expected);
+  Matrix<double> res = parallel_sle_solution_similar_simple(matrix_1, matrix_2);
+  ASSERT_EQ(res.GetShape(), expected.GetShape());
+  for (size_t i = 0; i < res.GetLength(); ++i) {
+    for (size_t j = 0; j < res.GetWidth(); ++j) {
+      ASSERT_NEAR(res(i, j), expected(i, j), 1e-10);
+    }
+  }
 }
 
 TEST(Matrix, ParallelSle_3) {
   Matrix<double> matrix_1({{2, 3, 5}, {3, 7, 4}, {1, 2, 2}});
   Matrix<double> matrix_2({{10}, {3}, {3}});
   Matrix<double> expected({{3}, {-2}, {2}});
-  ASSERT_EQ(parallel_sle_solution_similar_simple(matrix_1, matrix_2), expected);
+  Matrix<double> res = parallel_sle_solution_similar_simple(matrix_1, matrix_2);
+  ASSERT_EQ(res.GetShape(), expected.GetShape());
+  for (size_t i = 0; i < res.GetLength(); ++i) {
+    for (size_t j = 0; j < res.GetWidth(); ++j) {
+      ASSERT_NEAR(res(i, j), expected(i, j), 1e-10);
+    }
+  }
 }
 
 TEST(Matrix, ParallelSle_4){
   Matrix<double> matrix_1({ {3, -2, -5, 1}, {2, -3, 1, 5}, {1, 2, 0, -4}, {1, -1, -4, 9 } });
   Matrix<double> matrix_2({ {3}, {-3}, {-3}, {22} });
   Matrix<double> expected({ {-1}, {3}, {-2}, {2} });
-  ASSERT_EQ(parallel_sle_solution_similar_simple(matrix_1, matrix_2), expected);
+  Matrix<double> res = parallel_sle_solution_similar_simple(matrix_1, matrix_2);
+  ASSERT_EQ(res.GetShape(), expected.GetShape());
+  for (size_t i = 0; i < res.GetLength(); ++i) {
+    for (size_t j = 0; j < res.GetWidth(); ++j) {
+      ASSERT_NEAR(res(i, j), expected(i, j), 1e-10);
+    }
+  }
 }
 
 TEST(Matrix, ParallelSle_5){
   Matrix<double> matrix_1({ {1, 1, 4, 4, 9}, {2, 2, 17, 17, 82}, {2, 0, 3, -1, 4}, {0, 1, 4, 12, 27}, {1, 2, 2, 10, 0} });
   Matrix<double> matrix_2({ {-9}, {-146}, {-10}, {-26}, {37} });
   Matrix<double> expected({ {5}, {4}, {-3}, {3}, {-2} });
-  ASSERT_EQ(parallel_sle_solution_similar_simple(matrix_1, matrix_2), expected);
+  Matrix<double> res = parallel_sle_solution_similar_simple(matrix_1, matrix_2);
+  ASSERT_EQ(res.GetShape(), expected.GetShape());
+  for (size_t i = 0; i < res.GetLength(); ++i) {
+    for (size_t j = 0; j < res.GetWidth(); ++j) {
+      ASSERT_NEAR(res(i, j), expected(i, j), 1e-10);
+    }
+  }
 }
 
 TEST(Matrix, ParallelSle_5_dif_shape){
   Matrix<double> matrix_1({ {1, 1, 4, 4, 9}, {2, 2, 17, 17, 82}, {2, 0, 3, -1, 4}, {0, 1, 4, 12, 27}, {1, 2, 2, 10, 0}, {2, 2, 8, 8, 18} });
   Matrix<double> matrix_2({ {-9}, {-146}, {-10}, {-26}, {37}, {-18} });
   Matrix<double> expected({ {5}, {4}, {-3}, {3}, {-2} });
-  ASSERT_EQ(parallel_sle_solution_similar_simple(matrix_1, matrix_2), expected);
+  Matrix<double> res = parallel_sle_solution_similar_simple(matrix_1, matrix_2);
+  ASSERT_EQ(res.GetShape(), expected.GetShape());
+  for (size_t i = 0; i < res.GetLength(); ++i) {
+    for (size_t j = 0; j < res.GetWidth(); ++j) {
+      ASSERT_NEAR(res(i, j), expected(i, j), 1e-10);
+    }
+  }
 }
 
 TEST(Matrix, ParallelSle_big){
@@ -209,7 +299,13 @@ TEST(Matrix, ParallelSle_big){
       big_matrix.row_switching(i, size - 1 - i);
       big_matrix_res.row_switching(i, size - 1 - i);
   }
-  ASSERT_EQ(parallel_sle_solution_similar_simple(big_matrix, big_matrix_res), expected);
+ Matrix<double> res = parallel_sle_solution_similar_simple(big_matrix, big_matrix_res);
+  ASSERT_EQ(res.GetShape(), expected.GetShape());
+  for (size_t i = 0; i < res.GetLength(); ++i) {
+    for (size_t j = 0; j < res.GetWidth(); ++j) {
+      ASSERT_NEAR(res(i, j), expected(i, j), 1e-10);
+    }
+  }
 }
 
 TEST(Matrix, ParallelSle_large){
@@ -232,14 +328,26 @@ TEST(Matrix, ParallelSle_large){
       big_matrix.row_switching(i, size - 1 - i);
       big_matrix_res.row_switching(i, size - 1 - i);
   }
-  ASSERT_EQ(parallel_sle_solution_similar_simple(big_matrix, big_matrix_res), expected);
+  Matrix<double> res = parallel_sle_solution_similar_simple(big_matrix, big_matrix_res);
+  ASSERT_EQ(res.GetShape(), expected.GetShape());
+  for (size_t i = 0; i < res.GetLength(); ++i) {
+    for (size_t j = 0; j < res.GetWidth(); ++j) {
+      ASSERT_NEAR(res(i, j), expected(i, j), 1e-10);
+    }
+  }
 }
 
 TEST(Matrix, ParallelSle_zero) {
   Matrix<double> matrix_1({{0, 0, 0}, {0, 0, 0}, {0, 0, 0}});
   Matrix<double> matrix_2({{0}, {0}, {0}});
   Matrix<double> expected(0, 0);
-  ASSERT_EQ(parallel_sle_solution_similar_simple(matrix_1, matrix_2), expected);
+  Matrix<double> res = parallel_sle_solution_similar_simple(matrix_1, matrix_2);
+  ASSERT_EQ(res.GetShape(), expected.GetShape());
+  for (size_t i = 0; i < res.GetLength(); ++i) {
+    for (size_t j = 0; j < res.GetWidth(); ++j) {
+      ASSERT_NEAR(res(i, j), expected(i, j), 1e-10);
+    }
+  }
 }
 
 
@@ -249,42 +357,78 @@ TEST(Matrix, ParallelSlePerRows_3_inf) {
   Matrix<double> matrix_1({{2, -3, 1}, {3, -5, 5}, {5, -8, 6}});
   Matrix<double> matrix_2({{2}, {3}, {5}});
   Matrix<double> expected(0, 0);
-  ASSERT_EQ(parallel_sle_solution_per_rows(matrix_1, matrix_2), expected);
+  Matrix<double> res = parallel_sle_solution_per_rows(matrix_1, matrix_2);
+  ASSERT_EQ(res.GetShape(), expected.GetShape());
+  for (size_t i = 0; i < res.GetLength(); ++i) {
+    for (size_t j = 0; j < res.GetWidth(); ++j) {
+      ASSERT_NEAR(res(i, j), expected(i, j), 1e-10);
+    }
+  }
 }
 
 TEST(Matrix, ParallelSlePerRows_3_no_solution) {
   Matrix<double> matrix_1({{5, -6, 1}, {3, -5, -2}, {2, -1, 3}});
   Matrix<double> matrix_2({{4}, {3}, {5}});
   Matrix<double> expected(0, 0);
-  ASSERT_EQ(parallel_sle_solution_per_rows(matrix_1, matrix_2), expected);
+  Matrix<double> res = parallel_sle_solution_per_rows(matrix_1, matrix_2);
+  ASSERT_EQ(res.GetShape(), expected.GetShape());
+  for (size_t i = 0; i < res.GetLength(); ++i) {
+    for (size_t j = 0; j < res.GetWidth(); ++j) {
+      ASSERT_NEAR(res(i, j), expected(i, j), 1e-10);
+    }
+  }
 }
 
 TEST(Matrix, ParallelSlePerRows_3) {
   Matrix<double> matrix_1({{2, 3, 5}, {3, 7, 4}, {1, 2, 2}});
   Matrix<double> matrix_2({{10}, {3}, {3}});
   Matrix<double> expected({{3}, {-2}, {2}});
-  ASSERT_EQ(parallel_sle_solution_per_rows(matrix_1, matrix_2), expected);
+  Matrix<double> res = parallel_sle_solution_per_rows(matrix_1, matrix_2);
+  ASSERT_EQ(res.GetShape(), expected.GetShape());
+  for (size_t i = 0; i < res.GetLength(); ++i) {
+    for (size_t j = 0; j < res.GetWidth(); ++j) {
+      ASSERT_NEAR(res(i, j), expected(i, j), 1e-10);
+    }
+  }
 }
 
 TEST(Matrix, ParallelSlePerRows_4){
   Matrix<double> matrix_1({ {3, -2, -5, 1}, {2, -3, 1, 5}, {1, 2, 0, -4}, {1, -1, -4, 9 } });
   Matrix<double> matrix_2({ {3}, {-3}, {-3}, {22} });
   Matrix<double> expected({ {-1}, {3}, {-2}, {2} });
-  ASSERT_EQ(parallel_sle_solution_per_rows(matrix_1, matrix_2), expected);
+  Matrix<double> res = parallel_sle_solution_per_rows(matrix_1, matrix_2);
+  ASSERT_EQ(res.GetShape(), expected.GetShape());
+  for (size_t i = 0; i < res.GetLength(); ++i) {
+    for (size_t j = 0; j < res.GetWidth(); ++j) {
+      ASSERT_NEAR(res(i, j), expected(i, j), 1e-10);
+    }
+  }
 }
 
 TEST(Matrix, ParallelSlePerRows_5){
   Matrix<double> matrix_1({ {1, 1, 4, 4, 9}, {2, 2, 17, 17, 82}, {2, 0, 3, -1, 4}, {0, 1, 4, 12, 27}, {1, 2, 2, 10, 0} });
   Matrix<double> matrix_2({ {-9}, {-146}, {-10}, {-26}, {37} });
   Matrix<double> expected({ {5}, {4}, {-3}, {3}, {-2} });
-  ASSERT_EQ(parallel_sle_solution_per_rows(matrix_1, matrix_2), expected);
+  Matrix<double> res = parallel_sle_solution_per_rows(matrix_1, matrix_2);
+  ASSERT_EQ(res.GetShape(), expected.GetShape());
+  for (size_t i = 0; i < res.GetLength(); ++i) {
+    for (size_t j = 0; j < res.GetWidth(); ++j) {
+      ASSERT_NEAR(res(i, j), expected(i, j), 1e-10);
+    }
+  }
 }
 
 TEST(Matrix, ParallelSlePerRows_5_dif_shape){
   Matrix<double> matrix_1({ {1, 1, 4, 4, 9}, {2, 2, 17, 17, 82}, {2, 0, 3, -1, 4}, {0, 1, 4, 12, 27}, {1, 2, 2, 10, 0}, {2, 2, 8, 8, 18} });
   Matrix<double> matrix_2({ {-9}, {-146}, {-10}, {-26}, {37}, {-18} });
   Matrix<double> expected({ {5}, {4}, {-3}, {3}, {-2} });
-  ASSERT_EQ(parallel_sle_solution_per_rows(matrix_1, matrix_2), expected);
+  Matrix<double> res = parallel_sle_solution_per_rows(matrix_1, matrix_2);
+  ASSERT_EQ(res.GetShape(), expected.GetShape());
+  for (size_t i = 0; i < res.GetLength(); ++i) {
+    for (size_t j = 0; j < res.GetWidth(); ++j) {
+      ASSERT_NEAR(res(i, j), expected(i, j), 1e-10);
+    }
+  }
 }
 
 TEST(Matrix, ParallelSlePerRows_big){
@@ -307,7 +451,13 @@ TEST(Matrix, ParallelSlePerRows_big){
       big_matrix.row_switching(i, size - 1 - i);
       big_matrix_res.row_switching(i, size - 1 - i);
   }
-  ASSERT_EQ(parallel_sle_solution_per_rows(big_matrix, big_matrix_res), expected);
+  Matrix<double> res = parallel_sle_solution_per_rows(big_matrix, big_matrix_res);
+  ASSERT_EQ(res.GetShape(), expected.GetShape());
+  for (size_t i = 0; i < res.GetLength(); ++i) {
+    for (size_t j = 0; j < res.GetWidth(); ++j) {
+      ASSERT_NEAR(res(i, j), expected(i, j), 1e-10);
+    }
+  }
 }
 
 TEST(Matrix, ParallelSlePerRows_large){
@@ -330,14 +480,26 @@ TEST(Matrix, ParallelSlePerRows_large){
       big_matrix.row_switching(i, size - 1 - i);
       big_matrix_res.row_switching(i, size - 1 - i);
   }
-  ASSERT_EQ(parallel_sle_solution_per_rows(big_matrix, big_matrix_res), expected);
+  Matrix<double> res = parallel_sle_solution_per_rows(big_matrix, big_matrix_res);
+  ASSERT_EQ(res.GetShape(), expected.GetShape());
+  for (size_t i = 0; i < res.GetLength(); ++i) {
+    for (size_t j = 0; j < res.GetWidth(); ++j) {
+      ASSERT_NEAR(res(i, j), expected(i, j), 1e-10);
+    }
+  }
 }
 
 TEST(Matrix, ParallelSlePerRows_zero) {
   Matrix<double> matrix_1({{0, 0, 0}, {0, 0, 0}, {0, 0, 0}});
   Matrix<double> matrix_2({{0}, {0}, {0}});
   Matrix<double> expected(0, 0);
-  ASSERT_EQ(parallel_sle_solution_per_rows(matrix_1, matrix_2), expected);
+  Matrix<double> res = parallel_sle_solution_per_rows(matrix_1, matrix_2);
+  ASSERT_EQ(res.GetShape(), expected.GetShape());
+  for (size_t i = 0; i < res.GetLength(); ++i) {
+    for (size_t j = 0; j < res.GetWidth(); ++j) {
+      ASSERT_NEAR(res(i, j), expected(i, j), 1e-10);
+    }
+  }
 }
 
 
