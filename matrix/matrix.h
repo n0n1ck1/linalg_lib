@@ -47,7 +47,7 @@ public:
       }
     }
   }
-  Matrix(const size_t& h, const size_t& w) {
+  Matrix(const size_t& h, const size_t& w) { //ошибка: неоднозначно задается Matrix<double>({{0},{0}}) - не распознает, это конструктор от vector<vector> или от двух size_t
     T default_value = T();
     width_ = w;
     length_ = h;
@@ -94,7 +94,7 @@ public:
     }
     return matrix;
   }
-  Matrix get_submatrix(const size_t& start_row, const size_t& end_row, const size_t& start_column, const size_t& end_column) const {
+  Matrix get_submatrix(const size_t& start_row, const size_t& end_row, const size_t& start_column, const size_t& end_column) const { // можно распараллелить
     Matrix matrix(end_row-start_row+1, end_column-start_column+1);
     for (size_t i = start_row; i < end_row + 1; ++i) {
       for (size_t j = start_column; j < end_column + 1; ++j) {
@@ -118,11 +118,23 @@ public:
   }
 
   bool operator==(const Matrix& other) const {
-    return width_ == other.width_ && length_ == other.length_ && matrix_ == other.matrix_;
-  }
-  bool operator!=(const Matrix& other) const {
-    return !(width_ == other.width_ && length_ == other.length_ && matrix_ == other.matrix_);
-  }
+    if (width_ != other.width_ || length_ != other.length_)
+      return false;
+    bool almost_equal = true;
+    double eps = 1e-10;
+    for (size_t i = 0; i < length_ && almost_equal; ++i) {
+      for (size_t j = 0; j < width_; ++j) {
+        if (std::abs(matrix_[i*width_ + j] - other.matrix_[i*width_ + j]) >= eps) {
+          almost_equal = false;
+          break;
+        }
+      }
+    }
+    return almost_equal;
+}
+bool operator!=(const Matrix& other) const {
+  return !(*this == other);
+}
     
   Matrix& operator+=(const Matrix& other) {
     *this = *this + other;
@@ -145,7 +157,7 @@ public:
     return *this;
   }
     
-  Matrix& concatenate(const Matrix& other, size_t axis = 0) {
+  Matrix& concatenate(const Matrix& other, size_t axis = 0) { // можно распараллелить
     if (axis == 0) {
       if (!(width_ == other.width_)) {
         throw std::length_error("Different shapes.");
