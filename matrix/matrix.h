@@ -118,23 +118,11 @@ public:
   }
 
   bool operator==(const Matrix& other) const {
-    if (width_ != other.width_ || length_ != other.length_)
-      return false;
-    bool almost_equal = true;
-    double eps = 1e-10;
-    for (size_t i = 0; i < length_ && almost_equal; ++i) {
-      for (size_t j = 0; j < width_; ++j) {
-        if (std::abs(matrix_[i*width_ + j] - other.matrix_[i*width_ + j]) >= eps) {
-          almost_equal = false;
-          break;
-        }
-      }
-    }
-    return almost_equal;
-}
-bool operator!=(const Matrix& other) const {
-  return !(*this == other);
-}
+    return width_ == other.width_ && matrix_ == other.matrix_;
+  }
+  bool operator!=(const Matrix& other) const {
+    return !(width_ == other.width_ && matrix_ == other.matrix_);
+  }
     
   Matrix& operator+=(const Matrix& other) {
     *this = *this + other;
