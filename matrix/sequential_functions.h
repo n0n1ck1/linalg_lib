@@ -3,7 +3,7 @@
 #include "matrix.h"
 
 template<typename T>
-Matrix<T> seq_dot(const Matrix<T>& left, Matrix<T> right) {
+Matrix<T> seq_dot(const Matrix<T>& left, const Matrix<T>& right) {
   if (!(left.GetWidth() == right.GetLength())) {
     throw std::length_error("Left width (" + std::to_string(left.GetWidth()) + ") and right length (" + std::to_string(right.GetLength()) + ") are not equal.");
   }
