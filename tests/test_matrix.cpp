@@ -42,8 +42,18 @@ TEST(Matrix, Addition) {
   ASSERT_EQ(matrix_1 + matrix_2, expected);
 }
 
+TEST(Matrix, SimpleDeterminant) {
+  Matrix<double> matrix({{1, 2, 3, 4},
+                        {4, 3, 2, 1},
+                        {2, 3, 4, 6},
+                        {4, 2, 1, 3}});
+  ASSERT_EQ(det(matrix), 5);
+}
 
-
+TEST(Matrix, BigDeterminant) {
+  Matrix<double> matrix = diag(1.0, 1000);
+  ASSERT_EQ(det(matrix), 1);
+}
 
 TEST(Matrix, SimpleSle_3_inf) {
   Matrix<double> matrix_1({{2, -3, 1}, {3, -5, 5}, {5, -8, 6}});
@@ -149,9 +159,6 @@ TEST(Matrix, SimpleSle_zero) {
   ASSERT_EQ(expected, res);
 }
 
-
-
-
 TEST(Matrix, ParallelSle_3_inf) {
   Matrix<double> matrix_1({{2, -3, 1}, {3, -5, 5}, {5, -8, 6}});
   Matrix<double> matrix_2({{2}, {3}, {5}});
@@ -256,9 +263,6 @@ TEST(Matrix, ParallelSle_zero) {
   ASSERT_EQ(expected, res);
 }
 
-
-
-
 TEST(Matrix, ParallelSlePerRows_3_inf) {
   Matrix<double> matrix_1({{2, -3, 1}, {3, -5, 5}, {5, -8, 6}});
   Matrix<double> matrix_2({{2}, {3}, {5}});
@@ -362,10 +366,4 @@ TEST(Matrix, ParallelSlePerRows_zero) {
   Matrix<double> res = parallel_sle_solution_per_rows(matrix_1, matrix_2);
   ASSERT_EQ(expected, res);
 }
-
-
-
-
-
-
 
