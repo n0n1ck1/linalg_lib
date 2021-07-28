@@ -42,13 +42,6 @@ TEST(Matrix, Addition) {
   ASSERT_EQ(matrix_1 + matrix_2, expected);
 }
 
-TEST(Matrix, SLE1) {
-  Matrix<double> matrix_1({{2, -4, 1, -5}, {4, -7, -1, -8}, {10, -18, 2, -23}, {2, -3, 1, -1}});
-  Matrix<double> matrix_2({{2}, {-5}, {3}, {0}});
-  Matrix<double> expected({{1}, {2}, {3}, {-1}});
-  ASSERT_EQ(sle_solution(matrix_1, matrix_2), expected);
-}
-
 TEST(Matrix, SimpleDeterminant) {
   Matrix<double> matrix({{1, 2, 3, 4},
                         {4, 3, 2, 1},
@@ -60,4 +53,27 @@ TEST(Matrix, SimpleDeterminant) {
 TEST(Matrix, BigDeterminant) {
   Matrix<double> matrix = diag(1.0, 1000);
   ASSERT_EQ(det(matrix), 1);
+}
+
+TEST(Matrix, SimpleInverse) {
+  Matrix<double> matrix({{1.0, 2.0, 3.0, 4.0},
+                         {4.0, 3.0, 2.0, 1.0},
+                         {2.0, 3.0, 4.0, 6.0},
+                         {4.0, 2.0, 1.0, 3.0}});
+  Matrix<double> expected({{3.8, -0.2, -3.0, 1.0},
+                           {-9.2, 0.8, 7.0, -2.0},
+                           {6.8, -0.2, -5.0, 1.0},
+                           {-1.2, -0.2, 1.0, 0.0}});
+  Matrix<double> inv = inverse(matrix);
+  for (size_t i = 0; i < inv.GetLength(); ++i) {
+    for (size_t j = 0; j < inv.GetWidth(); ++j) {
+      ASSERT_NEAR(inv(i, j), expected(i, j), 1e-7);
+    }
+  }
+}
+
+TEST(Matrix, BigInverse) {
+  Matrix<double> matrix = diag(2.0, 500);
+  Matrix<double> expected = diag(0.5, 500);
+  ASSERT_EQ(inverse(matrix), expected);
 }

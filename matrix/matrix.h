@@ -13,6 +13,10 @@
 template <typename T>
 class Matrix {
 public:
+  Matrix() {
+    width_ = 0;
+    length_ = 0;
+  }
   Matrix(const std::vector<std::vector<T>>& matrix) {
     if (matrix.empty()) {
       width_ = 0;
@@ -73,7 +77,7 @@ public:
   std::pair<size_t, size_t> GetShape() const {
     return std::make_pair(length_, width_);
   }
-    
+
   T operator()(const size_t& row, const size_t& column) const {
     return matrix_[width_ * row + column];
   }
@@ -118,12 +122,12 @@ public:
   }
 
   bool operator==(const Matrix& other) const {
-    return width_ == other.width_ && length_ == other.length_ && matrix_ == other.matrix_;
+    return width_ == other.width_ && matrix_ == other.matrix_;
   }
   bool operator!=(const Matrix& other) const {
-    return !(width_ == other.width_ && length_ == other.length_ && matrix_ == other.matrix_);
+    return !(width_ == other.width_ && matrix_ == other.matrix_);
   }
-    
+
   Matrix& operator+=(const Matrix& other) {
     *this = *this + other;
     return *this;
@@ -144,7 +148,7 @@ public:
     *this = dot((*this), other);
     return *this;
   }
-    
+
   Matrix& concatenate(const Matrix& other, size_t axis = 0) {
     if (axis == 0) {
       if (!(width_ == other.width_)) {
@@ -176,7 +180,7 @@ public:
     }
     return *this;
   }
-    
+
   bool empty() const {
     return matrix_.empty();
   }
@@ -242,4 +246,3 @@ std::ostream& operator<<(std::ostream& out, const Matrix<T>& matrix) {
   }
   return out;
 }
-
