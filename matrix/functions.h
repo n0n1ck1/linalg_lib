@@ -159,64 +159,68 @@ Matrix<T> diag_from_vector(const std::vector<T> vector) {
   return res;
 }
 
-template <typename T>
-Matrix<T> sle_solution(const Matrix<T> &left_part, const Matrix<T> right_part) {
-  auto [left_length, left_width] = left_part.GetShape();
-  auto [right_length, right_width] = right_part.GetShape();
-  if (left_length != right_length) {
-    throw std::length_error("Shapes do not match.");
-  }
-  Matrix<T> sle_matrix = concatenate(left_part, right_part, 1);
-  //size_t length = left_width;
-  //size_t width = right_width;
 
-  //straight gauss
-  for (size_t i = 0; i < left_width; ++i) {
-    size_t first_not_zero = i;
-    while (first_not_zero < left_length && sle_matrix(first_not_zero, i) == 0) {
-      ++first_not_zero;
+template<typename T>
+T det(Matrix<T> matrix) {
+    size_t width = matrix.GetWidth();
+    size_t length = matrix.GetLength();
+    if (width != length) {
+        throw "The matrix isn't a square";
+        return static_cast<T>(0);
     }
-    if (first_not_zero == left_length) {
-      return Matrix<T>(0, 0);
-    }
-    while (first_not_zero != i) {
-      sle_matrix.row_switching(first_not_zero, first_not_zero - 1);
-      --first_not_zero;
-    }
-
-    for (size_t j = first_not_zero + 1; j < left_length; ++j) {
-      sle_matrix.row_addition(j, first_not_zero, -sle_matrix(j, i) / sle_matrix(first_not_zero, i));
-    }
-
-    sle_matrix.row_multiplication(first_not_zero, 1 / sle_matrix(first_not_zero, i));
-  }
-  if (left_length > left_width) {
-    bool do_not_have_solution = false;
-    for (size_t i = left_width; i < left_length; ++i) {
-      for (size_t j = 0; j < left_width + right_width; ++j) {
-        if (sle_matrix(i, j) != 0) {
-          do_not_have_solution = true;
-          break;
+    T res = static_cast<T>(1);
+    size_t n_threads = 2;
+    for (size_t i = 0; i < width - 1; ++i) {
+        std::vector<std::thread> threads;
+        threads.reserve(n_threads);
+        if (matrix(i, i) == static_cast<T>(0)) {
+            bool has_non_zero = false;
+            size_t index_non_zero;
+            for (size_t k = 0; k < n_threads; ++k) {
+                threads.emplace_back([&](const size_t& id){
+                    // divide the rows in range [i, width] evenly between all threads
+                    for (size_t j = i + id * (width - i ) / n_threads; j < i + (id + 1) * (width - i) / n_threads; ++j) {
+                        if (matrix(j, i) != 0) {
+                            has_non_zero = true;
+                            index_non_zero = j;
+                            return;
+                        }
+                    }
+                }, k);
+            }
+            for (auto& t : threads) {
+                t.join();
+            }
+            if (!has_non_zero) {
+                return static_cast<T>(0);
+            }
+            matrix.row_switching(i, index_non_zero);
+            res *= static_cast<T>(-1);
         }
-      }
-      if (do_not_have_solution) {
-        break;
-      }
+        threads.clear();
+        // the same as above, except the first thread mustn't have the i-th row in it
+        threads.emplace_back([&] {
+            for (size_t j = i + 1; j < i + (width - i) / n_threads; ++j) {
+                matrix.row_addition(j, i, static_cast<T>(-1) * matrix(j, i) / matrix(i, i));
+            }
+        });
+        for (size_t k = 1; k < n_threads; ++k) {
+            threads.emplace_back([&](const size_t& id) {
+                for (size_t j = std::max(i + id * (width - i) / n_threads, i + 1); j < i + (id + 1) * (width - i) / n_threads; ++j) {
+                    matrix.row_addition(j, i, static_cast<T>(-1) * matrix(j, i) / matrix(i, i));
+                }
+            }, k);
+        }
+        for (auto& t : threads) {
+            t.join();
+        }
     }
-    if (do_not_have_solution) {
-      return Matrix<T>(0, 0);
+    for (size_t i = 0; i < width; ++i) {
+        res *= matrix(i, i);
     }
-  }
-
-  //reversed gauss
-  for (int i = left_width - 1; i != -1; --i) {
-    for (int j = i - 1; j != -1; --j) {
-      sle_matrix.row_addition(j, i, -sle_matrix(j, i));
-    }
-  }
-
-  return sle_matrix.get_submatrix(0, left_width - 1, left_width, left_width + right_width - 1);
+    return res;
 }
+
 
 template<typename T>
 Matrix<T> inverse(const Matrix<T>& matrix) {
@@ -292,3 +296,71 @@ Matrix<T> inverse(const Matrix<T>& matrix) {
   }
   return sle.get_submatrix(0, width - 1, width, 2 * width - 1);
 }
+
+
+template <typename T>
+Matrix<T> sle_solution(const Matrix<T> &left_part, const Matrix<T> right_part) {
+  auto [left_length, left_width] = left_part.GetShape();
+  auto [right_length, right_width] = right_part.GetShape();
+  if (left_length != right_length) {
+    throw std::length_error("Shapes do not match.");
+  }
+  Matrix<T> sle_matrix = concatenate(left_part, right_part, 1);
+  //size_t length = left_width;
+  //size_t width = right_width;
+
+  //straight gauss
+  for (size_t i = 0; i < left_width; ++i) {
+    size_t first_not_zero = i;
+    while (first_not_zero < left_length && sle_matrix(first_not_zero, i) == 0) {
+      ++first_not_zero;
+    }
+    if (first_not_zero == left_length) {
+      return Matrix<T>(0, 0);
+    }
+    while (first_not_zero != i) {
+      sle_matrix.row_switching(first_not_zero, first_not_zero - 1);
+      --first_not_zero;
+    }
+
+    for (size_t j = first_not_zero + 1; j < left_length; ++j) {
+      sle_matrix.row_addition(j, first_not_zero, -sle_matrix(j, i) / sle_matrix(first_not_zero, i));
+    }
+
+    sle_matrix.row_multiplication(first_not_zero, 1 / sle_matrix(first_not_zero, i));
+  }
+  if (left_length > left_width) {
+    bool do_not_have_solution = false;
+    for (size_t i = left_width; i < left_length; ++i) {
+      for (size_t j = 0; j < left_width + right_width; ++j) {
+        if (sle_matrix(i, j) != 0) {
+          do_not_have_solution = true;
+          break;
+        }
+      }
+      if (do_not_have_solution) {
+        break;
+      }
+    }
+    if (do_not_have_solution) {
+      return Matrix<T>(0, 0);
+    }
+  }
+
+  //reversed gauss
+  for (int i = left_width - 1; i != -1; --i) {
+    for (int j = i - 1; j != -1; --j) {
+      sle_matrix.row_addition(j, i, -sle_matrix(j, i));
+    }
+  }
+
+  return sle_matrix.get_submatrix(0, left_width - 1, left_width, left_width + right_width - 1);
+}
+
+
+
+
+
+
+
+
