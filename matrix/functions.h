@@ -315,67 +315,6 @@ Matrix<T> inverse(const Matrix<T>& matrix) {
   return sle.get_submatrix(0, width - 1, width, 2 * width - 1);
 }
 
-
-template <typename T>
-Matrix<T> sle_solution(const Matrix<T> &left_part, const Matrix<T> right_part) {
-  auto [left_length, left_width] = left_part.GetShape();
-  auto [right_length, right_width] = right_part.GetShape();
-  if (left_length != right_length) {
-    throw std::length_error("Shapes do not match.");
-  }
-  Matrix<T> sle_matrix = concatenate(left_part, right_part, 1);
-  //size_t length = left_width;
-  //size_t width = right_width;
-
-  //straight gauss
-  for (size_t i = 0; i < left_width; ++i) {
-    size_t first_not_zero = i;
-    while (first_not_zero < left_length && sle_matrix(first_not_zero, i) == 0) {
-      ++first_not_zero;
-    }
-    if (first_not_zero == left_length) {
-      return Matrix<T>(0, 0);
-    }
-    while (first_not_zero != i) {
-      sle_matrix.row_switching(first_not_zero, first_not_zero - 1);
-      --first_not_zero;
-    }
-
-    for (size_t j = first_not_zero + 1; j < left_length; ++j) {
-      sle_matrix.row_addition(j, first_not_zero, -sle_matrix(j, i) / sle_matrix(first_not_zero, i));
-    }
-
-    sle_matrix.row_multiplication(first_not_zero, 1 / sle_matrix(first_not_zero, i));
-  }
-  if (left_length > left_width) {
-    bool do_not_have_solution = false;
-    for (size_t i = left_width; i < left_length; ++i) {
-      for (size_t j = 0; j < left_width + right_width; ++j) {
-        if (sle_matrix(i, j) != 0) {
-          do_not_have_solution = true;
-          break;
-        }
-      }
-      if (do_not_have_solution) {
-        break;
-      }
-    }
-    if (do_not_have_solution) {
-      return Matrix<T>(0, 0);
-    }
-  }
-
-  //reversed gauss
-  for (int i = left_width - 1; i != -1; --i) {
-    for (int j = i - 1; j != -1; --j) {
-      sle_matrix.row_addition(j, i, -sle_matrix(j, i));
-    }
-  }
-
-  return sle_matrix.get_submatrix(0, left_width - 1, left_width, left_width + right_width - 1);
-}
-
-
 template<typename T>
 Matrix<T> parallel_sle_solution(const Matrix<T>& left_part, const Matrix<T> right_part) {
   int left_length = left_part.GetLength();
