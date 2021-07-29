@@ -55,6 +55,29 @@ TEST(Matrix, BigDeterminant) {
   ASSERT_EQ(det(matrix), 1);
 }
 
+TEST(Matrix, SimpleInverse) {
+  Matrix<double> matrix({{1.0, 2.0, 3.0, 4.0},
+                         {4.0, 3.0, 2.0, 1.0},
+                         {2.0, 3.0, 4.0, 6.0},
+                         {4.0, 2.0, 1.0, 3.0}});
+  Matrix<double> expected({{3.8, -0.2, -3.0, 1.0},
+                           {-9.2, 0.8, 7.0, -2.0},
+                           {6.8, -0.2, -5.0, 1.0},
+                           {-1.2, -0.2, 1.0, 0.0}});
+  Matrix<double> inv = inverse(matrix);
+  for (size_t i = 0; i < inv.GetLength(); ++i) {
+    for (size_t j = 0; j < inv.GetWidth(); ++j) {
+      ASSERT_NEAR(inv(i, j), expected(i, j), 1e-7);
+    }
+  }
+}
+
+TEST(Matrix, BigInverse) {
+  Matrix<double> matrix = diag(2.0, 500);
+  Matrix<double> expected = diag(0.5, 500);
+  ASSERT_EQ(inverse(matrix), expected);
+}
+
 TEST(Matrix, SimpleSle_3_inf) {
   Matrix<double> matrix_1({{2, -3, 1}, {3, -5, 5}, {5, -8, 6}});
   Matrix<double> matrix_2({{2}, {3}, {5}});
@@ -366,4 +389,3 @@ TEST(Matrix, ParallelSlePerRows_zero) {
   Matrix<double> res = parallel_sle_solution_per_rows(matrix_1, matrix_2);
   ASSERT_EQ(expected, res);
 }
-

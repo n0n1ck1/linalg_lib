@@ -13,6 +13,10 @@
 template <typename T>
 class Matrix {
 public:
+  Matrix() {
+    width_ = 0;
+    length_ = 0;
+  }
   Matrix(const std::vector<std::vector<T>>& matrix) {
     if (matrix.empty()) {
       width_ = 0;
@@ -147,7 +151,7 @@ public:
   }
 
   bool operator!=(const Matrix& other) const {
-      return !(*this == other);
+    return !(*this == other);
   }
 
 
@@ -175,7 +179,7 @@ public:
     *this = dot((*this), other);
     return *this;
   }
-    
+
   Matrix& concatenate(const Matrix& other, size_t axis = 0) {
     if (axis == 0) {
       if (!(width_ == other.width_)) {
@@ -280,4 +284,3 @@ std::ostream& operator<<(std::ostream& out, const Matrix<T>& matrix) {
   }
   return out;
 }
-
