@@ -34,6 +34,7 @@ public:
       }
     }
   }
+
   Matrix(std::vector<std::vector<T>>&& matrix) {
     if (matrix.empty()) {
       width_ = 0;
@@ -51,22 +52,26 @@ public:
       }
     }
   }
-  Matrix(const size_t& h, const size_t& w) {
+
+  Matrix(const size_t& h, const size_t& w) { //ошибка: неоднозначно задается Matrix<double>({{0},{0}}) - не распознает, это конструктор от vector<vector> или от двух size_t
     T default_value = T();
     width_ = w;
     length_ = h;
     matrix_ = std::vector<T>(h * w, default_value);
   }
+
   Matrix(const Matrix& other) {
     matrix_ = other.matrix_;
     width_ = other.width_;
     length_ = other.length_;
   }
+
   Matrix(Matrix&& other) {
     matrix_ = std::move(other.matrix_);
     width_ = other.width_;
     length_ = other.length_;
   }
+
 
   size_t GetWidth() const {
     return width_;
@@ -78,12 +83,15 @@ public:
     return std::make_pair(length_, width_);
   }
 
+
   T operator()(const size_t& row, const size_t& column) const {
     return matrix_[width_ * row + column];
   }
+
   T& operator()(const size_t& row, const size_t& column) {
     return matrix_[width_ * row + column];
   }
+
   Matrix get_row(const size_t& row) const {
     Matrix matrix(1, width_);
     for (size_t i = 0; i < width_; ++i) {
@@ -91,6 +99,7 @@ public:
     }
     return matrix;
   }
+
   Matrix get_column(const size_t& column) const {
     Matrix matrix(length_, 1);
     for (size_t i = 0; i < length_; ++i) {
@@ -98,7 +107,8 @@ public:
     }
     return matrix;
   }
-  Matrix get_submatrix(const size_t& start_row, const size_t& end_row, const size_t& start_column, const size_t& end_column) const {
+
+  Matrix get_submatrix(const size_t& start_row, const size_t& end_row, const size_t& start_column, const size_t& end_column) const { // можно распараллелить
     Matrix matrix(end_row-start_row+1, end_column-start_column+1);
     for (size_t i = start_row; i < end_row + 1; ++i) {
       for (size_t j = start_column; j < end_column + 1; ++j) {
@@ -108,12 +118,14 @@ public:
     return matrix;
   }
 
+
   Matrix& operator=(const Matrix& other) {
     matrix_ = other.matrix_;
     width_ = other.width_;
     length_ = other.length_;
     return *this;
   }
+
   Matrix& operator=(Matrix&& other) noexcept {
     matrix_ = std::move(other.matrix_);
     width_ = other.width_;
@@ -121,29 +133,48 @@ public:
     return *this;
   }
 
+
   bool operator==(const Matrix& other) const {
-    return width_ == other.width_ && matrix_ == other.matrix_;
+    if (width_ != other.width_ || length_ != other.length_)
+      return false;
+    bool almost_equal = true;
+    double eps = 1e-4;
+    for (size_t i = 0; i < length_ && almost_equal; ++i) {
+      for (size_t j = 0; j < width_; ++j) {
+        if (double(1)*std::abs(matrix_[i*width_ + j] - other.matrix_[i*width_ + j]) / std::abs(other.matrix_[i*width_ + j]) > eps) {
+          almost_equal = false;
+          break;
+        }
+      }
+    }
+    return almost_equal;
   }
+
   bool operator!=(const Matrix& other) const {
-    return !(width_ == other.width_ && matrix_ == other.matrix_);
+    return !(*this == other);
   }
+
 
   Matrix& operator+=(const Matrix& other) {
     *this = *this + other;
     return *this;
   }
+
   Matrix& operator-=(const Matrix& other) {
     *this = *this - other;
     return *this;
   }
+
   Matrix& operator*=(const Matrix& other) {
     *this = (*this) * other;
     return *this;
   }
+
   Matrix& operator/=(const Matrix& other) {
     *this = (*this) / other;
     return *this;
   }
+
   Matrix& dot(const Matrix& other) {
     *this = dot((*this), other);
     return *this;
@@ -181,9 +212,11 @@ public:
     return *this;
   }
 
+
   bool empty() const {
     return matrix_.empty();
   }
+
 
   Matrix& row_addition(size_t i, size_t j, T k) {
     for (size_t x = 0; x < width_; ++x) {
@@ -191,12 +224,14 @@ public:
     }
     return *this;
   }
+
   Matrix& row_multiplication(size_t i, T k) {
     for (size_t x = 0; x < width_; ++x) {
       matrix_[i*width_ + x] *= k;
     }
     return *this;
   }
+
   Matrix& row_switching(size_t i, size_t j) {
     for (size_t x = 0; x < width_; ++x) {
       std::swap(matrix_[i*width_ + x], matrix_[j*width_ + x]);
@@ -210,18 +245,21 @@ public:
     }
     return *this;
   }
+
   Matrix& column_multiplication(size_t i, T k) {
     for (size_t x = 0; x < length_; ++x) {
       matrix_[i + x * width_] *= k;
     }
     return *this;
   }
+
   Matrix& column_switching(size_t i, size_t j) {
     for (size_t x = 0; x < length_; ++x) {
       std::swap(matrix_[i + x * width_], matrix_[j + x * width_]);
     }
     return *this;
   }
+
 
 private:
   std::vector<T> matrix_;

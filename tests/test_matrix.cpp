@@ -77,3 +77,315 @@ TEST(Matrix, BigInverse) {
   Matrix<double> expected = diag(0.5, 500);
   ASSERT_EQ(inverse(matrix), expected);
 }
+
+TEST(Matrix, SimpleSle_3_inf) {
+  Matrix<double> matrix_1({{2, -3, 1}, {3, -5, 5}, {5, -8, 6}});
+  Matrix<double> matrix_2({{2}, {3}, {5}});
+  Matrix<double> expected(0, 0);
+  Matrix<double> res = sle_solution(matrix_1, matrix_2);
+  ASSERT_EQ(expected, res);
+}
+
+TEST(Matrix, SimpleSle_3_no_solution) {
+  Matrix<double> matrix_1({{5, -6, 1}, {3, -5, -2}, {2, -1, 3}});
+  Matrix<double> matrix_2({{4}, {3}, {5}});
+  Matrix<double> expected(0, 0);
+  Matrix<double> res = sle_solution(matrix_1, matrix_2);
+  ASSERT_EQ(expected, res);
+}
+
+TEST(Matrix, SimpleSle_3) {
+  Matrix<double> matrix_1({{2, 3, 5}, {3, 7, 4}, {1, 2, 2}});
+  Matrix<double> matrix_2({{10}, {3}, {3}});
+  Matrix<double> expected({{3}, {-2}, {2}});
+  Matrix<double> res = sle_solution(matrix_1, matrix_2);
+  ASSERT_EQ(expected, res);
+}
+
+TEST(Matrix, SimpleSle_4){
+  Matrix<double> matrix_1({ {3, -2, -5, 1}, {2, -3, 1, 5}, {1, 2, 0, -4}, {1, -1, -4, 9 } });
+  Matrix<double> matrix_2({ {3}, {-3}, {-3}, {22} });
+  Matrix<double> expected({ {-1}, {3}, {-2}, {2} });
+  Matrix<double> res = sle_solution(matrix_1, matrix_2);
+  ASSERT_EQ(expected, res);
+}
+
+TEST(Matrix, SimpleSle_5){
+  Matrix<double> matrix_1({ {1, 1, 4, 4, 9}, {2, 2, 17, 17, 82}, {2, 0, 3, -1, 4}, {0, 1, 4, 12, 27}, {1, 2, 2, 10, 0} });
+  Matrix<double> matrix_2({ {-9}, {-146}, {-10}, {-26}, {37} });
+  Matrix<double> expected({ {5}, {4}, {-3}, {3}, {-2} });
+  Matrix<double> res = sle_solution(matrix_1, matrix_2);
+  ASSERT_EQ(expected, res);
+}
+
+TEST(Matrix, SimpleSle_5_dif_shape){
+  Matrix<double> matrix_1({ {1, 1, 4, 4, 9}, {2, 2, 17, 17, 82}, {2, 0, 3, -1, 4}, {0, 1, 4, 12, 27}, {1, 2, 2, 10, 0}, {2, 2, 8, 8, 18} });
+  Matrix<double> matrix_2({ {-9}, {-146}, {-10}, {-26}, {37}, {-18} });
+  Matrix<double> expected({ {5}, {4}, {-3}, {3}, {-2} });
+  Matrix<double> res = sle_solution(matrix_1, matrix_2);
+  ASSERT_EQ(expected, res);
+}
+
+TEST(Matrix, SimpleSle_big){
+  int size = 100;
+  double val = 2.;
+  Matrix<double> big_matrix = diag(val, size);
+  Matrix<double> big_matrix_res(size, 1);
+  for (int i = 0; i < size; ++i) {
+      big_matrix_res(i, 0) = val;
+  }
+  Matrix<double> expected(size, 1);
+  for (int i = 0; i < size; ++i) {
+      expected(i, 0) = 1.;
+  }
+  for (int i = size - 2; i > -1; --i) {
+      big_matrix.row_addition(i, i + 1, 1);
+      big_matrix_res.row_addition(i, i + 1, 1);
+  }
+  for (int i = 0; i < size / 2; ++i) {
+      big_matrix.row_switching(i, size - 1 - i);
+      big_matrix_res.row_switching(i, size - 1 - i);
+  }
+  Matrix<double> res = sle_solution(big_matrix, big_matrix_res);
+  ASSERT_EQ(expected, res);
+}
+
+TEST(Matrix, SimpleSle_large){
+    int size = 1000;
+  double val = 2.;
+  Matrix<double> big_matrix = diag(val, size);
+  Matrix<double> big_matrix_res(size, 1);
+  for (int i = 0; i < size; ++i) {
+      big_matrix_res(i, 0) = val;
+  }
+  Matrix<double> expected(size, 1);
+  for (int i = 0; i < size; ++i) {
+      expected(i, 0) = 1.;
+  }
+  for (int i = size - 2; i > -1; --i) {
+      big_matrix.row_addition(i, i + 1, 1);
+      big_matrix_res.row_addition(i, i + 1, 1);
+  }
+  for (int i = 0; i < size / 2; ++i) {
+      big_matrix.row_switching(i, size - 1 - i);
+      big_matrix_res.row_switching(i, size - 1 - i);
+  }
+  Matrix<double> res = sle_solution(big_matrix, big_matrix_res);
+  ASSERT_EQ(expected, res);
+}
+
+TEST(Matrix, SimpleSle_zero) {
+  Matrix<double> matrix_1({{0, 0, 0}, {0, 0, 0}, {0, 0, 0}});
+  Matrix<double> matrix_2({{0}, {0}, {0}});
+  Matrix<double> expected(0, 0);
+  Matrix<double> res = sle_solution(matrix_1, matrix_2);
+  ASSERT_EQ(expected, res);
+}
+
+TEST(Matrix, ParallelSle_3_inf) {
+  Matrix<double> matrix_1({{2, -3, 1}, {3, -5, 5}, {5, -8, 6}});
+  Matrix<double> matrix_2({{2}, {3}, {5}});
+  Matrix<double> expected(0, 0);
+  Matrix<double> res = parallel_sle_solution(matrix_1, matrix_2);
+  ASSERT_EQ(expected, res);
+}
+
+TEST(Matrix, ParallelSle_3_no_solution) {
+  Matrix<double> matrix_1({{5, -6, 1}, {3, -5, -2}, {2, -1, 3}});
+  Matrix<double> matrix_2({{4}, {3}, {5}});
+  Matrix<double> expected(0, 0);
+  Matrix<double> res = parallel_sle_solution(matrix_1, matrix_2);
+  ASSERT_EQ(expected, res);
+}
+
+TEST(Matrix, ParallelSle_3) {
+  Matrix<double> matrix_1({{2, 3, 5}, {3, 7, 4}, {1, 2, 2}});
+  Matrix<double> matrix_2({{10}, {3}, {3}});
+  Matrix<double> expected({{3}, {-2}, {2}});
+  Matrix<double> res = parallel_sle_solution(matrix_1, matrix_2);
+  ASSERT_EQ(expected, res);
+}
+
+TEST(Matrix, ParallelSle_4){
+  Matrix<double> matrix_1({ {3, -2, -5, 1}, {2, -3, 1, 5}, {1, 2, 0, -4}, {1, -1, -4, 9 } });
+  Matrix<double> matrix_2({ {3}, {-3}, {-3}, {22} });
+  Matrix<double> expected({ {-1}, {3}, {-2}, {2} });
+  Matrix<double> res = parallel_sle_solution(matrix_1, matrix_2);
+  ASSERT_EQ(expected, res);
+}
+
+TEST(Matrix, ParallelSle_5){
+  Matrix<double> matrix_1({ {1, 1, 4, 4, 9}, {2, 2, 17, 17, 82}, {2, 0, 3, -1, 4}, {0, 1, 4, 12, 27}, {1, 2, 2, 10, 0} });
+  Matrix<double> matrix_2({ {-9}, {-146}, {-10}, {-26}, {37} });
+  Matrix<double> expected({ {5}, {4}, {-3}, {3}, {-2} });
+  Matrix<double> res = parallel_sle_solution(matrix_1, matrix_2);
+  ASSERT_EQ(expected, res);
+}
+
+TEST(Matrix, ParallelSle_5_dif_shape){
+  Matrix<double> matrix_1({ {1, 1, 4, 4, 9}, {2, 2, 17, 17, 82}, {2, 0, 3, -1, 4}, {0, 1, 4, 12, 27}, {1, 2, 2, 10, 0}, {2, 2, 8, 8, 18} });
+  Matrix<double> matrix_2({ {-9}, {-146}, {-10}, {-26}, {37}, {-18} });
+  Matrix<double> expected({ {5}, {4}, {-3}, {3}, {-2} });
+  Matrix<double> res = parallel_sle_solution(matrix_1, matrix_2);
+  ASSERT_EQ(expected, res);
+}
+
+TEST(Matrix, ParallelSle_big){
+  int size = 100;
+  double val = 2.;
+  Matrix<double> big_matrix = diag(val, size);
+  Matrix<double> big_matrix_res(size, 1);
+  for (int i = 0; i < size; ++i) {
+      big_matrix_res(i, 0) = val;
+  }
+  Matrix<double> expected(size, 1);
+  for (int i = 0; i < size; ++i) {
+      expected(i, 0) = 1.;
+  }
+  for (int i = size - 2; i > -1; --i) {
+      big_matrix.row_addition(i, i + 1, 1);
+      big_matrix_res.row_addition(i, i + 1, 1);
+  }
+  for (int i = 0; i < size / 2; ++i) {
+      big_matrix.row_switching(i, size - 1 - i);
+      big_matrix_res.row_switching(i, size - 1 - i);
+  }
+  Matrix<double> res = parallel_sle_solution(big_matrix, big_matrix_res);
+  ASSERT_EQ(expected, res);
+}
+
+TEST(Matrix, ParallelSle_large){
+    int size = 1000;
+  double val = 2.;
+  Matrix<double> big_matrix = diag(val, size);
+  Matrix<double> big_matrix_res(size, 1);
+  for (int i = 0; i < size; ++i) {
+      big_matrix_res(i, 0) = val;
+  }
+  Matrix<double> expected(size, 1);
+  for (int i = 0; i < size; ++i) {
+      expected(i, 0) = 1.;
+  }
+  for (int i = size - 2; i > -1; --i) {
+      big_matrix.row_addition(i, i + 1, 1);
+      big_matrix_res.row_addition(i, i + 1, 1);
+  }
+  for (int i = 0; i < size / 2; ++i) {
+      big_matrix.row_switching(i, size - 1 - i);
+      big_matrix_res.row_switching(i, size - 1 - i);
+  }
+  Matrix<double> res = parallel_sle_solution(big_matrix, big_matrix_res);
+  ASSERT_EQ(expected, res);
+}
+
+TEST(Matrix, ParallelSle_zero) {
+  Matrix<double> matrix_1({{0, 0, 0}, {0, 0, 0}, {0, 0, 0}});
+  Matrix<double> matrix_2({{0}, {0}, {0}});
+  Matrix<double> expected(0, 0);
+  Matrix<double> res = parallel_sle_solution(matrix_1, matrix_2);
+  ASSERT_EQ(expected, res);
+}
+
+TEST(Matrix, ParallelSlePerRows_3_inf) {
+  Matrix<double> matrix_1({{2, -3, 1}, {3, -5, 5}, {5, -8, 6}});
+  Matrix<double> matrix_2({{2}, {3}, {5}});
+  Matrix<double> expected(0, 0);
+  Matrix<double> res = parallel_sle_solution_per_rows(matrix_1, matrix_2);
+  ASSERT_EQ(expected, res);
+}
+
+TEST(Matrix, ParallelSlePerRows_3_no_solution) {
+  Matrix<double> matrix_1({{5, -6, 1}, {3, -5, -2}, {2, -1, 3}});
+  Matrix<double> matrix_2({{4}, {3}, {5}});
+  Matrix<double> expected(0, 0);
+  Matrix<double> res = parallel_sle_solution_per_rows(matrix_1, matrix_2);
+  ASSERT_EQ(expected, res);
+}
+
+TEST(Matrix, ParallelSlePerRows_3) {
+  Matrix<double> matrix_1({{2, 3, 5}, {3, 7, 4}, {1, 2, 2}});
+  Matrix<double> matrix_2({{10}, {3}, {3}});
+  Matrix<double> expected({{3}, {-2}, {2}});
+  Matrix<double> res = parallel_sle_solution_per_rows(matrix_1, matrix_2);
+  ASSERT_EQ(expected, res);
+}
+
+TEST(Matrix, ParallelSlePerRows_4){
+  Matrix<double> matrix_1({ {3, -2, -5, 1}, {2, -3, 1, 5}, {1, 2, 0, -4}, {1, -1, -4, 9 } });
+  Matrix<double> matrix_2({ {3}, {-3}, {-3}, {22} });
+  Matrix<double> expected({ {-1}, {3}, {-2}, {2} });
+  Matrix<double> res = parallel_sle_solution_per_rows(matrix_1, matrix_2);
+  ASSERT_EQ(expected, res);
+}
+
+TEST(Matrix, ParallelSlePerRows_5){
+  Matrix<double> matrix_1({ {1, 1, 4, 4, 9}, {2, 2, 17, 17, 82}, {2, 0, 3, -1, 4}, {0, 1, 4, 12, 27}, {1, 2, 2, 10, 0} });
+  Matrix<double> matrix_2({ {-9}, {-146}, {-10}, {-26}, {37} });
+  Matrix<double> expected({ {5}, {4}, {-3}, {3}, {-2} });
+  Matrix<double> res = parallel_sle_solution_per_rows(matrix_1, matrix_2);
+  ASSERT_EQ(expected, res);
+}
+
+TEST(Matrix, ParallelSlePerRows_5_dif_shape){
+  Matrix<double> matrix_1({ {1, 1, 4, 4, 9}, {2, 2, 17, 17, 82}, {2, 0, 3, -1, 4}, {0, 1, 4, 12, 27}, {1, 2, 2, 10, 0}, {2, 2, 8, 8, 18} });
+  Matrix<double> matrix_2({ {-9}, {-146}, {-10}, {-26}, {37}, {-18} });
+  Matrix<double> expected({ {5}, {4}, {-3}, {3}, {-2} });
+  Matrix<double> res = parallel_sle_solution_per_rows(matrix_1, matrix_2);
+  ASSERT_EQ(expected, res);
+}
+
+TEST(Matrix, ParallelSlePerRows_big){
+  int size = 100;
+  double val = 2.;
+  Matrix<double> big_matrix = diag(val, size);
+  Matrix<double> big_matrix_res(size, 1);
+  for (int i = 0; i < size; ++i) {
+      big_matrix_res(i, 0) = val;
+  }
+  Matrix<double> expected(size, 1);
+  for (int i = 0; i < size; ++i) {
+      expected(i, 0) = 1.;
+  }
+  for (int i = size - 2; i > -1; --i) {
+      big_matrix.row_addition(i, i + 1, 1);
+      big_matrix_res.row_addition(i, i + 1, 1);
+  }
+  for (int i = 0; i < size / 2; ++i) {
+      big_matrix.row_switching(i, size - 1 - i);
+      big_matrix_res.row_switching(i, size - 1 - i);
+  }
+  Matrix<double> res = parallel_sle_solution_per_rows(big_matrix, big_matrix_res);
+  ASSERT_EQ(expected, res);
+}
+
+TEST(Matrix, ParallelSlePerRows_large){
+  int size = 1000;
+  double val = 2.;
+  Matrix<double> big_matrix = diag(val, size);
+  Matrix<double> big_matrix_res(size, 1);
+  for (int i = 0; i < size; ++i) {
+      big_matrix_res(i, 0) = val;
+  }
+  Matrix<double> expected(size, 1);
+  for (int i = 0; i < size; ++i) {
+      expected(i, 0) = 1.;
+  }
+  for (int i = size - 2; i > -1; --i) {
+      big_matrix.row_addition(i, i + 1, 1);
+      big_matrix_res.row_addition(i, i + 1, 1);
+  }
+  for (int i = 0; i < size / 2; ++i) {
+      big_matrix.row_switching(i, size - 1 - i);
+      big_matrix_res.row_switching(i, size - 1 - i);
+  }
+  Matrix<double> res = parallel_sle_solution_per_rows(big_matrix, big_matrix_res);
+  ASSERT_EQ(expected, res);
+}
+
+TEST(Matrix, ParallelSlePerRows_zero) {
+  Matrix<double> matrix_1({{0, 0, 0}, {0, 0, 0}, {0, 0, 0}});
+  Matrix<double> matrix_2({{0}, {0}, {0}});
+  Matrix<double> expected(0, 0);
+  Matrix<double> res = parallel_sle_solution_per_rows(matrix_1, matrix_2);
+  ASSERT_EQ(expected, res);
+}
