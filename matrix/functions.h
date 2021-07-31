@@ -76,7 +76,7 @@ Matrix<T> operator*(const Matrix<T>& matrix1, const Matrix<T>& matrix2) {
 }
 
 template<typename T>
-Matrix<T> operator*(T scale, const Matrix<T>& matrix) {
+Matrix<T> operator*(const T& scale, const Matrix<T>& matrix) {
   size_t width = matrix.GetWidth();
   size_t length = matrix.GetLength();
   Matrix<T> res(length, width);
@@ -123,7 +123,7 @@ Matrix<T> operator/(const Matrix<T>& matrix1, const Matrix<T>& matrix2) {
 
 
 template<typename T>
-Matrix<T> dot(const Matrix<T>& left, Matrix<T> right) {
+Matrix<T> dot(const Matrix<T>& left, const Matrix<T>& right) {
   if (!(left.GetWidth() == right.GetLength())) {
     throw std::length_error("Left width (" + std::to_string(left.GetWidth()) + ") and right length (" + std::to_string(right.GetLength()) + ") are not equal.");
   }
@@ -149,6 +149,13 @@ Matrix<T> dot(const Matrix<T>& left, Matrix<T> right) {
   }
   return res;
 }
+
+
+template<typename T>
+Matrix<T> operator^(const Matrix<T>& matrix1, const Matrix<T>& matrix2) {
+  return dot(matrix1, matrix2);
+}
+
 
 template<typename T>
 Matrix<T> concatenate(const Matrix<T>& matrix1, const Matrix<T>& matrix2, size_t axis = 0) {
@@ -184,7 +191,6 @@ T det(Matrix<T> matrix) {
     size_t length = matrix.GetLength();
     if (width != length) {
         throw "The matrix isn't a square";
-        return static_cast<T>(0);
     }
     T res = static_cast<T>(1);
     size_t n_threads = 2;
@@ -243,8 +249,7 @@ T det(Matrix<T> matrix) {
 template<typename T>
 Matrix<T> inverse(const Matrix<T>& matrix) {
   if (matrix.GetWidth() != matrix.GetLength()) {
-    throw "The matrix ins't a square";
-    return Matrix<T>();
+    throw "The matrix isn't a square";
   }
   size_t width = matrix.GetWidth();
   Matrix<T> sle = concatenate(matrix, diag(1.0, width), 1);
@@ -272,7 +277,6 @@ Matrix<T> inverse(const Matrix<T>& matrix) {
       }
       if (!has_non_zero) {
         throw "Determinant equals 0, inverse matrix doesn't exist";
-        return Matrix<T>();
       }
       sle.row_switching(i, index_non_zero);
     }
@@ -296,7 +300,6 @@ Matrix<T> inverse(const Matrix<T>& matrix) {
   }
   if (sle(width - 1, width - 1) == 0) {
     throw "Determinant equals 0, inverse matrix doesn't exist";
-    return Matrix<T>();
   }
   for (long long int i = width - 1; i >= 0; --i) {
     sle.row_multiplication(i, 1 / sle(i, i));
@@ -313,6 +316,14 @@ Matrix<T> inverse(const Matrix<T>& matrix) {
     }
   }
   return sle.get_submatrix(0, width - 1, width, 2 * width - 1);
+}
+
+
+template<typename T>
+Matrix<T> transposed(const Matrix<T> &matrix) {
+  Matrix<T> res = matrix;
+  res.transpose();
+  return res;
 }
 
 
