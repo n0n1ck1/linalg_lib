@@ -53,12 +53,13 @@ public:
     }
   }
 
-  Matrix(const size_t& h, const size_t& w) { //ошибка: неоднозначно задается Matrix<double>({{0},{0}}) - не распознает, это конструктор от vector<vector> или от двух size_t
+  explicit Matrix(const size_t& h, const size_t& w) {  // ошибка: неоднозначно задается Matrix<double>({{0},{0}}) - не распознает, это конструктор от vector<vector> или от двух size_t
     T default_value = T();
     width_ = w;
     length_ = h;
     matrix_ = std::vector<T>(h * w, default_value);
   }
+  Matrix(const size_t& n) : Matrix(n, n) {}
 
   Matrix(const Matrix& other) {
     matrix_ = other.matrix_;
@@ -108,13 +109,37 @@ public:
     return matrix;
   }
 
-  Matrix get_submatrix(const size_t& start_row, const size_t& end_row, const size_t& start_column, const size_t& end_column) const { // можно распараллелить
-    Matrix matrix(end_row-start_row+1, end_column-start_column+1);
-    for (size_t i = start_row; i < end_row + 1; ++i) {
-      for (size_t j = start_column; j < end_column + 1; ++j) {
-        matrix(i - start_row, j - start_column) = matrix_[i*width_ + j];
-      }
+  Matrix get_submatrix(const size_t& start_row, const size_t& end_row, const size_t& start_column, const size_t& end_column) const {
+    if (!(width_ > end_column && length_ > end_row)) {
+      throw std::out_of_range("Specified submatrix doesn't exist.");
     }
+
+    Matrix matrix(end_row - start_row + 1, end_column - start_column + 1);
+
+    size_t n_threads = 2;
+    size_t new_width = matrix.width_;
+    size_t new_length = matrix.length_;
+    std::vector<std::thread> threads;
+    for (size_t k = 0; k < n_threads; ++k) {
+      threads.emplace_back([&] (const size_t& id) {
+        for (size_t i = id * new_length / n_threads; i < (id + 1) * new_length / n_threads; ++i) {
+          for (size_t j = 0; j < new_width; ++j) {
+            matrix(i, j) = matrix_[(i + start_row) * width_ + (j + start_column)];
+          }
+        }
+      }, k);
+    }
+    for (auto& t : threads) {
+      t.join();
+    }
+
+//    оставил seq-версию для сравнений и замечаний
+//    for (size_t i = start_row; i < end_row + 1; ++i) {
+//      for (size_t j = start_column; j < end_column + 1; ++j) {
+//        matrix(i - start_row, j - start_column) = matrix_[i * width_ + j];
+//      }
+//    }
+
     return matrix;
   }
 
@@ -170,13 +195,23 @@ public:
     return *this;
   }
 
+  Matrix& operator*=(const T& scale) {
+    *this = scale * (*this);
+    return *this;
+  }
+
   Matrix& operator/=(const Matrix& other) {
     *this = (*this) / other;
     return *this;
   }
 
+  Matrix& operator^=(const Matrix& other) {
+    *this = (*this) ^ other;
+    return *this;
+  }
+
   Matrix& dot(const Matrix& other) {
-    *this = dot((*this), other);
+    *this = (*this) ^ other;
     return *this;
   }
 
@@ -258,6 +293,26 @@ public:
       std::swap(matrix_[i + x * width_], matrix_[j + x * width_]);
     }
     return *this;
+  }
+
+
+  void transpose() {
+    Matrix<T> res(width_, length_);
+    size_t n_threads = 2;
+    std::vector<std::thread> threads;
+    for (size_t k = 0; k < n_threads; ++k) {
+      threads.emplace_back([&] (size_t id) {
+        for (size_t i = id * width_ / n_threads; i < (id + 1) * width_ / n_threads; ++i) {
+          for (size_t j = 0; j < length_; ++j) {
+            res(i, j) = matrix_[j * width_ + i];
+          }
+        }
+      }, k);
+    }
+    for (auto& t: threads) {
+      t.join();
+    }
+    *this = res;
   }
 
 
