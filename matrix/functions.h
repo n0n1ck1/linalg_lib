@@ -319,6 +319,7 @@ Matrix<T> inverse(const Matrix<T>& matrix) {
 }
 
 
+
 template<typename T>
 Matrix<T> transposed(const Matrix<T> &matrix) {
   Matrix<T> res = matrix;
