@@ -343,14 +343,14 @@ Matrix<T> parallel_sle_solution(const Matrix<T>& left_part, const Matrix<T> righ
   // size_t length = left_width;
   // size_t width = right_width;
   // straight gauss
-  for (int i = 0; i < int(left_width); ++i) {
+  for (int i = 0; i < left_width; ++i) {
     int to_look_at = (left_length - 1 - i) / n_threads + ((left_length - 1 - i) % n_threads == 0 ? 0 : 1);
     if (sle_matrix(i, i) == 0) {
       std::atomic<int> first_not_zero{ i };
       std::atomic<bool> has_not_zero{ false };
       for (int k = 0; k < n_threads; ++k) {
         threads.emplace_back([&](int id) {
-          for (int j = i + 1 + id * to_look_at; j < int(left_length) && j < i + 1 + (id + 1)*to_look_at && !has_not_zero.load(); ++j) {
+          for (int j = i + 1 + id * to_look_at; j < left_length && j < i + 1 + (id + 1)*to_look_at && !has_not_zero.load(); ++j) {
             if (sle_matrix(j, i) != 0) {
               has_not_zero.store(true);
               first_not_zero.store(j);
@@ -370,7 +370,7 @@ Matrix<T> parallel_sle_solution(const Matrix<T>& left_part, const Matrix<T> righ
     }
     for (int k = 0; k < n_threads; ++k) {
       threads.emplace_back([&](int id) {
-        for (int j = i + 1 + id * to_look_at; j < int(left_length) && j < i + 1 + (id + 1)*to_look_at; ++j) {
+        for (int j = i + 1 + id * to_look_at; j < left_length && j < i + 1 + (id + 1)*to_look_at; ++j) {
           sle_matrix.row_addition(j, i, -sle_matrix(j, i) / sle_matrix(i, i));
         }
       }, k);
@@ -386,8 +386,8 @@ Matrix<T> parallel_sle_solution(const Matrix<T>& left_part, const Matrix<T> righ
     std::atomic<bool> do_not_have_solution{ false };
     for (int k = 0; k < n_threads; ++k) {
       threads.emplace_back([&](int id) {
-        for (int i = int(left_width) + id * to_look_at; i < int(left_length) && i < int(left_width) + (id + 1)*to_look_at && !do_not_have_solution.load(); ++i) {
-          for (int j = 0; j < int(left_width + right_width) && !do_not_have_solution.load(); ++j) {
+        for (int i = left_width + id * to_look_at; i < left_length && i < left_width + (id + 1)*to_look_at && !do_not_have_solution.load(); ++i) {
+          for (int j = 0; j < left_width + right_width && !do_not_have_solution.load(); ++j) {
             if (sle_matrix(i, j) != 0) {
               do_not_have_solution.store(true);
               break;
@@ -530,17 +530,18 @@ size_t parallel_rank(const Matrix<T>& matrix) {
   int n_threads = 2;
   std::vector<std::thread> threads;
   threads.reserve(n_threads);
-  auto [length, width] = matrix.GetShape();
+  int width = matrix.GetWidth();
+  int length = matrix.GetLength();
   Matrix<T> temp_matrix = matrix;
-  size_t row = 0;
-  for (size_t column = 0; column < width && row < length; ++column) {
+  int row = 0;
+  for (int column = 0; column < width && row < length; ++column) {
     int to_look_at = (length - 1 - row) / n_threads + ((length - 1 - row) % n_threads == 0 ? 0 : 1);
     if (temp_matrix(row, column) == 0) {
-      std::atomic<int> first_not_zero{ int(row) };
+      std::atomic<int> first_not_zero{ row };
       std::atomic<bool> has_not_zero{ false };
       for (int k = 0; k < n_threads; ++k) {
         threads.emplace_back([&](int id) {
-          for (int i = row + 1 + id * to_look_at; i < int(length) && i < row + 1 + (id + 1)*to_look_at && !has_not_zero.load(); ++i) {
+          for (int i = row + 1 + id * to_look_at; i < length && i < row + 1 + (id + 1)*to_look_at && !has_not_zero.load(); ++i) {
             if (temp_matrix(i, column) != 0) {
               has_not_zero.store(true);
               first_not_zero.store(i);
@@ -560,7 +561,7 @@ size_t parallel_rank(const Matrix<T>& matrix) {
     }
     for (int k = 0; k < n_threads; ++k) {
       threads.emplace_back([&](int id) {
-        for (int i = row + 1 + id * to_look_at; i < int(length) && i < row + 1 + (id + 1)*to_look_at; ++i) {
+        for (int i = row + 1 + id * to_look_at; i < length && i < row + 1 + (id + 1)*to_look_at; ++i) {
           temp_matrix.row_addition(i, row, -temp_matrix(i, column) / temp_matrix(row, column));
         }
       }, k);
@@ -577,8 +578,9 @@ size_t parallel_rank(const Matrix<T>& matrix) {
 
 
 template <typename T>
-size_t parallel_rank_per_raws(const Matrix<T>& matrix) {
-  auto [length, width] = matrix.GetShape();
+size_t parallel_rank_per_rows(const Matrix<T>& matrix) {
+  int width = matrix.GetWidth();
+  int length = matrix.GetLength();
   Matrix<T> temp_matrix = matrix;
   std::atomic<size_t> result{0};
   std::vector<std::atomic<int>> sequence(width);
