@@ -114,3 +114,30 @@ TEST(SeqFuncs, Sle_big){
   Matrix<double> res = seq_sle_solution(big_matrix, big_matrix_res);
   ASSERT_EQ(expected, res);
 }
+
+TEST(SeqFuncs, Rank){
+  std::vector<size_t> expected({0, 0, 0, 1, 2, 3, 3, 3, 1, 2, 2, 2, 2, 1});
+  std::vector<size_t> result;
+  result.reserve(expected.size());
+  result.push_back(seq_rank( Matrix<double>({ {0,0,0}, {0,0,0} })));
+  result.push_back(seq_rank( Matrix<double>({ {0,0,0}, {0,0,0}, {0,0,0} })));
+  result.push_back(seq_rank( Matrix<double>({ {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0} })));
+  result.push_back(seq_rank( Matrix<double>({ {0,0,0}, {0,0,0}, {0,0,1} })));
+  result.push_back(seq_rank( Matrix<double>({ {0,0,0}, {0,1,0}, {0,0,1} })));
+  result.push_back(seq_rank( Matrix<double>({ {1,0,0}, {0,1,0}, {0,0,1} })));
+  result.push_back(seq_rank( Matrix<double>({ {1,0,0}, {0,1,0}, {0,0,1}, {1,2,3} })));
+  result.push_back(seq_rank( Matrix<double>({ {1,2,3}, {0,1,0}, {0,0,1} })));
+  result.push_back(seq_rank( Matrix<double>({ {1,2,3}, {2,4,6}, {0,0,0} })));
+  result.push_back(seq_rank( Matrix<double>({ {1,2,3}, {0,1,0}, {1,3,3} })));
+  result.push_back(seq_rank( Matrix<double>({ {1,2,3}, {0,1,0} })));
+  result.push_back(seq_rank( Matrix<double>({ {2,4,2}, {0,0,0}, {0,0,0}, {0,2,0}, {-1,0,-1} })));
+  result.push_back(seq_rank( Matrix<double>({ {3,2,1}, {1,2,3} })));
+  result.push_back(seq_rank( Matrix<double>({ {4,4,4}, {4,4,4} })));
+  ASSERT_EQ(expected, result);
+}
+
+TEST(SeqFuncs, ParallelRank_big){
+  size_t size = 500;
+  Matrix<double> matrix = diag(1., size);
+  ASSERT_EQ(seq_rank(matrix), size);
+}
