@@ -67,7 +67,7 @@ TEST(SeqFuncs, Sle_3) {
   ASSERT_EQ(expected, res);
 }
 
-TEST(SeqFuncs, Sle_4){
+TEST(SeqFuncs, Sle_4) {
   Matrix<double> matrix_1({ {3, -2, -5, 1}, {2, -3, 1, 5}, {1, 2, 0, -4}, {1, -1, -4, 9 } });
   Matrix<double> matrix_2({ {3}, {-3}, {-3}, {22} });
   Matrix<double> expected({ {-1}, {3}, {-2}, {2} });
@@ -75,7 +75,7 @@ TEST(SeqFuncs, Sle_4){
   ASSERT_EQ(expected, res);
 }
 
-TEST(SeqFuncs, Sle_5){
+TEST(SeqFuncs, Sle_5) {
   Matrix<double> matrix_1({ {1, 1, 4, 4, 9}, {2, 2, 17, 17, 82}, {2, 0, 3, -1, 4}, {0, 1, 4, 12, 27}, {1, 2, 2, 10, 0} });
   Matrix<double> matrix_2({ {-9}, {-146}, {-10}, {-26}, {37} });
   Matrix<double> expected({ {5}, {4}, {-3}, {3}, {-2} });
@@ -83,7 +83,7 @@ TEST(SeqFuncs, Sle_5){
   ASSERT_EQ(expected, res);
 }
 
-TEST(SeqFuncs, Sle_5_dif_shape){
+TEST(SeqFuncs, Sle_5_dif_shape) {
   Matrix<double> matrix_1({ {1, 1, 4, 4, 9}, {2, 2, 17, 17, 82}, {2, 0, 3, -1, 4}, {0, 1, 4, 12, 27}, {1, 2, 2, 10, 0}, {2, 2, 8, 8, 18} });
   Matrix<double> matrix_2({ {-9}, {-146}, {-10}, {-26}, {37}, {-18} });
   Matrix<double> expected({ {5}, {4}, {-3}, {3}, {-2} });
@@ -91,7 +91,7 @@ TEST(SeqFuncs, Sle_5_dif_shape){
   ASSERT_EQ(expected, res);
 }
 
-TEST(SeqFuncs, Sle_big){
+TEST(SeqFuncs, Sle_big) {
   int size = 100;
   double val = 2.;
   Matrix<double> big_matrix = diag(val, size);
@@ -115,7 +115,7 @@ TEST(SeqFuncs, Sle_big){
   ASSERT_EQ(expected, res);
 }
 
-TEST(SeqFuncs, Rank){
+TEST(SeqFuncs, Rank) {
   std::vector<size_t> expected({0, 0, 0, 1, 2, 3, 3, 3, 1, 2, 2, 2, 2, 1});
   std::vector<size_t> result;
   result.reserve(expected.size());
@@ -136,7 +136,7 @@ TEST(SeqFuncs, Rank){
   ASSERT_EQ(expected, result);
 }
 
-TEST(SeqFuncs, ParallelRank_big){
+TEST(SeqFuncs, Rank_big) {
   size_t size = 500;
   Matrix<double> matrix = diag(1., size);
   ASSERT_EQ(seq_rank(matrix), size);
