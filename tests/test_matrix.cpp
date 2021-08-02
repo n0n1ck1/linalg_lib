@@ -279,3 +279,57 @@ TEST(Matrix, ParallelSlePerRows_zero) {
   Matrix<double> res = parallel_sle_solution_per_rows(matrix_1, matrix_2);
   ASSERT_EQ(expected, res);
 }
+
+TEST(Matrix, ParallelRank){
+  std::vector<size_t> expected({0, 0, 0, 1, 2, 3, 3, 3, 1, 2, 2, 2, 2, 1});
+  std::vector<size_t> result;
+  result.reserve(expected.size());
+  result.push_back(parallel_rank( Matrix<double>({ {0,0,0}, {0,0,0} })));
+  result.push_back(parallel_rank( Matrix<double>({ {0,0,0}, {0,0,0}, {0,0,0} })));
+  result.push_back(parallel_rank( Matrix<double>({ {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0} })));
+  result.push_back(parallel_rank( Matrix<double>({ {0,0,0}, {0,0,0}, {0,0,1} })));
+  result.push_back(parallel_rank( Matrix<double>({ {0,0,0}, {0,1,0}, {0,0,1} })));
+  result.push_back(parallel_rank( Matrix<double>({ {1,0,0}, {0,1,0}, {0,0,1} })));
+  result.push_back(parallel_rank( Matrix<double>({ {1,0,0}, {0,1,0}, {0,0,1}, {1,2,3} })));
+  result.push_back(parallel_rank( Matrix<double>({ {1,2,3}, {0,1,0}, {0,0,1} })));
+  result.push_back(parallel_rank( Matrix<double>({ {1,2,3}, {2,4,6}, {0,0,0} })));
+  result.push_back(parallel_rank( Matrix<double>({ {1,2,3}, {0,1,0}, {1,3,3} })));
+  result.push_back(parallel_rank( Matrix<double>({ {1,2,3}, {0,1,0} })));
+  result.push_back(parallel_rank( Matrix<double>({ {2,4,2}, {0,0,0}, {0,0,0}, {0,2,0}, {-1,0,-1} })));
+  result.push_back(parallel_rank( Matrix<double>({ {3,2,1}, {1,2,3} })));
+  result.push_back(parallel_rank( Matrix<double>({ {4,4,4}, {4,4,4} })));
+  ASSERT_EQ(expected, result);
+}
+
+TEST(Matrix, ParallelRank_big){
+  size_t size = 500;
+  Matrix<double> matrix = diag(1., size);
+  ASSERT_EQ(parallel_rank(matrix), size);
+}
+
+TEST(Matrix, ParallelRankPerRows){
+  std::vector<size_t> expected({0, 0, 0, 1, 2, 3, 3, 3, 1, 2, 2, 2, 2, 1});
+  std::vector<size_t> result;
+  result.reserve(expected.size());
+  result.push_back(parallel_rank_per_rows( Matrix<double>({ {0,0,0}, {0,0,0} })));
+  result.push_back(parallel_rank_per_rows( Matrix<double>({ {0,0,0}, {0,0,0}, {0,0,0} })));
+  result.push_back(parallel_rank_per_rows( Matrix<double>({ {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0} })));
+  result.push_back(parallel_rank_per_rows( Matrix<double>({ {0,0,0}, {0,0,0}, {0,0,1} })));
+  result.push_back(parallel_rank_per_rows( Matrix<double>({ {0,0,0}, {0,1,0}, {0,0,1} })));
+  result.push_back(parallel_rank_per_rows( Matrix<double>({ {1,0,0}, {0,1,0}, {0,0,1} })));
+  result.push_back(parallel_rank_per_rows( Matrix<double>({ {1,0,0}, {0,1,0}, {0,0,1}, {1,2,3} })));
+  result.push_back(parallel_rank_per_rows( Matrix<double>({ {1,2,3}, {0,1,0}, {0,0,1} })));
+  result.push_back(parallel_rank_per_rows( Matrix<double>({ {1,2,3}, {2,4,6}, {0,0,0} })));
+  result.push_back(parallel_rank_per_rows( Matrix<double>({ {1,2,3}, {0,1,0}, {1,3,3} })));
+  result.push_back(parallel_rank_per_rows( Matrix<double>({ {1,2,3}, {0,1,0} })));
+  result.push_back(parallel_rank_per_rows( Matrix<double>({ {2,4,2}, {0,0,0}, {0,0,0}, {0,2,0}, {-1,0,-1} })));
+  result.push_back(parallel_rank_per_rows( Matrix<double>({ {3,2,1}, {1,2,3} })));
+  result.push_back(parallel_rank_per_rows( Matrix<double>({ {4,4,4}, {4,4,4} })));
+  ASSERT_EQ(expected, result);
+}
+
+TEST(Matrix, ParallelRankPerRows_big){
+  size_t size = 500;
+  Matrix<double> matrix = diag(1., size);
+  ASSERT_EQ(parallel_rank_per_rows(matrix), size);
+}
