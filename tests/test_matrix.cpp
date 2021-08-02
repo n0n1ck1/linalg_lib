@@ -96,7 +96,7 @@ TEST(Matrix, ParallelSle_3) {
   ASSERT_EQ(expected, res);
 }
 
-TEST(Matrix, ParallelSle_4){
+TEST(Matrix, ParallelSle_4) {
   Matrix<double> matrix_1({ {3, -2, -5, 1}, {2, -3, 1, 5}, {1, 2, 0, -4}, {1, -1, -4, 9 } });
   Matrix<double> matrix_2({ {3}, {-3}, {-3}, {22} });
   Matrix<double> expected({ {-1}, {3}, {-2}, {2} });
@@ -104,7 +104,7 @@ TEST(Matrix, ParallelSle_4){
   ASSERT_EQ(expected, res);
 }
 
-TEST(Matrix, ParallelSle_5){
+TEST(Matrix, ParallelSle_5) {
   Matrix<double> matrix_1({ {1, 1, 4, 4, 9}, {2, 2, 17, 17, 82}, {2, 0, 3, -1, 4}, {0, 1, 4, 12, 27}, {1, 2, 2, 10, 0} });
   Matrix<double> matrix_2({ {-9}, {-146}, {-10}, {-26}, {37} });
   Matrix<double> expected({ {5}, {4}, {-3}, {3}, {-2} });
@@ -112,7 +112,7 @@ TEST(Matrix, ParallelSle_5){
   ASSERT_EQ(expected, res);
 }
 
-TEST(Matrix, ParallelSle_5_dif_shape){
+TEST(Matrix, ParallelSle_5_dif_shape) {
   Matrix<double> matrix_1({ {1, 1, 4, 4, 9}, {2, 2, 17, 17, 82}, {2, 0, 3, -1, 4}, {0, 1, 4, 12, 27}, {1, 2, 2, 10, 0}, {2, 2, 8, 8, 18} });
   Matrix<double> matrix_2({ {-9}, {-146}, {-10}, {-26}, {37}, {-18} });
   Matrix<double> expected({ {5}, {4}, {-3}, {3}, {-2} });
@@ -120,7 +120,7 @@ TEST(Matrix, ParallelSle_5_dif_shape){
   ASSERT_EQ(expected, res);
 }
 
-TEST(Matrix, ParallelSle_big){
+TEST(Matrix, ParallelSle_big) {
   int size = 100;
   double val = 2.;
   Matrix<double> big_matrix = diag(val, size);
@@ -144,7 +144,7 @@ TEST(Matrix, ParallelSle_big){
   ASSERT_EQ(expected, res);
 }
 
-TEST(Matrix, ParallelSle_large){
+TEST(Matrix, ParallelSle_large) {
     int size = 1000;
   double val = 2.;
   Matrix<double> big_matrix = diag(val, size);
@@ -200,7 +200,7 @@ TEST(Matrix, ParallelSlePerRows_3) {
   ASSERT_EQ(expected, res);
 }
 
-TEST(Matrix, ParallelSlePerRows_4){
+TEST(Matrix, ParallelSlePerRows_4) {
   Matrix<double> matrix_1({ {3, -2, -5, 1}, {2, -3, 1, 5}, {1, 2, 0, -4}, {1, -1, -4, 9 } });
   Matrix<double> matrix_2({ {3}, {-3}, {-3}, {22} });
   Matrix<double> expected({ {-1}, {3}, {-2}, {2} });
@@ -208,7 +208,7 @@ TEST(Matrix, ParallelSlePerRows_4){
   ASSERT_EQ(expected, res);
 }
 
-TEST(Matrix, ParallelSlePerRows_5){
+TEST(Matrix, ParallelSlePerRows_5) {
   Matrix<double> matrix_1({ {1, 1, 4, 4, 9}, {2, 2, 17, 17, 82}, {2, 0, 3, -1, 4}, {0, 1, 4, 12, 27}, {1, 2, 2, 10, 0} });
   Matrix<double> matrix_2({ {-9}, {-146}, {-10}, {-26}, {37} });
   Matrix<double> expected({ {5}, {4}, {-3}, {3}, {-2} });
@@ -216,7 +216,7 @@ TEST(Matrix, ParallelSlePerRows_5){
   ASSERT_EQ(expected, res);
 }
 
-TEST(Matrix, ParallelSlePerRows_5_dif_shape){
+TEST(Matrix, ParallelSlePerRows_5_dif_shape) {
   Matrix<double> matrix_1({ {1, 1, 4, 4, 9}, {2, 2, 17, 17, 82}, {2, 0, 3, -1, 4}, {0, 1, 4, 12, 27}, {1, 2, 2, 10, 0}, {2, 2, 8, 8, 18} });
   Matrix<double> matrix_2({ {-9}, {-146}, {-10}, {-26}, {37}, {-18} });
   Matrix<double> expected({ {5}, {4}, {-3}, {3}, {-2} });
@@ -224,7 +224,7 @@ TEST(Matrix, ParallelSlePerRows_5_dif_shape){
   ASSERT_EQ(expected, res);
 }
 
-TEST(Matrix, ParallelSlePerRows_big){
+TEST(Matrix, ParallelSlePerRows_big) {
   int size = 100;
   double val = 2.;
   Matrix<double> big_matrix = diag(val, size);
@@ -248,7 +248,7 @@ TEST(Matrix, ParallelSlePerRows_big){
   ASSERT_EQ(expected, res);
 }
 
-TEST(Matrix, ParallelSlePerRows_large){
+TEST(Matrix, ParallelSlePerRows_large) {
   int size = 500;
   double val = 2.;
   Matrix<double> big_matrix = diag(val, size);
@@ -280,7 +280,7 @@ TEST(Matrix, ParallelSlePerRows_zero) {
   ASSERT_EQ(expected, res);
 }
 
-TEST(Matrix, ParallelRank){
+TEST(Matrix, ParallelRank) {
   std::vector<size_t> expected({0, 0, 0, 1, 2, 3, 3, 3, 1, 2, 2, 2, 2, 1});
   std::vector<size_t> result;
   result.reserve(expected.size());
@@ -301,13 +301,13 @@ TEST(Matrix, ParallelRank){
   ASSERT_EQ(expected, result);
 }
 
-TEST(Matrix, ParallelRank_big){
+TEST(Matrix, ParallelRank_big) {
   size_t size = 500;
   Matrix<double> matrix = diag(1., size);
   ASSERT_EQ(parallel_rank(matrix), size);
 }
 
-TEST(Matrix, ParallelRankPerRows){
+TEST(Matrix, ParallelRankPerRows) {
   std::vector<size_t> expected({0, 0, 0, 1, 2, 3, 3, 3, 1, 2, 2, 2, 2, 1});
   std::vector<size_t> result;
   result.reserve(expected.size());
@@ -328,7 +328,7 @@ TEST(Matrix, ParallelRankPerRows){
   ASSERT_EQ(expected, result);
 }
 
-TEST(Matrix, ParallelRankPerRows_big){
+TEST(Matrix, ParallelRankPerRows_big) {
   size_t size = 500;
   Matrix<double> matrix = diag(1., size);
   ASSERT_EQ(parallel_rank_per_rows(matrix), size);
