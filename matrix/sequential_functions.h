@@ -157,6 +157,29 @@ Matrix<T> seq_sle_solution(const Matrix<T> &left_part, const Matrix<T> right_par
   return sle_matrix.get_submatrix(0, left_width - 1, left_width, left_width + right_width - 1);
 }
 
+template <typename T>
+size_t seq_rank(const Matrix<T>& matrix) {
+  auto [length, width] = matrix.GetShape();
+  Matrix<T> temp_matrix = matrix;
+  size_t row = 0;
+  for (size_t column = 0; column < width; ++column) {
+    size_t first_not_zero = row;
+    while (first_not_zero < length && temp_matrix(first_not_zero, column) == 0) {
+      ++first_not_zero;
+    }
+    if (first_not_zero == length) {
+      continue;
+    }
+    temp_matrix.row_switching(first_not_zero, row);
+    for (size_t i = row + 1; i < length; ++i) {
+      temp_matrix.row_addition(i, row, -temp_matrix(i, column) / temp_matrix(row, column));
+    }
+    temp_matrix.row_multiplication(row, 1 / temp_matrix(row, column));
+    ++row;
+  }
+  return row;
+}
+
 template<typename T>
 Matrix<T> seq_add(const Matrix<T>& matrix1, const Matrix<T>& matrix2) {
   if (!(matrix1.GetLength() == matrix2.GetLength() && matrix1.GetWidth() == matrix2.GetWidth())) {
