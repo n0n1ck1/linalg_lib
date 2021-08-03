@@ -73,14 +73,14 @@ static void BM_SLE(benchmark::State& state) {
   }
   // TODO: replace diag(1, 100) with a randomly generated matrix
   for (auto _ : state) {
-    benchmark::DoNotOptimize(parallel_sle_solution(matrix, result));
+    benchmark::DoNotOptimize(sle_solution(matrix, result));
   }
 }
 
 BENCHMARK(BM_SLE);
 // Run the benchmark
 
-static void BM_ParallelSLEPerRows(benchmark::State& state) {
+static void BM_FastSLE(benchmark::State& state) {
   Matrix<double> matrix = diag(1.0, 100);
   Matrix<double> result(100, 1);
   for (size_t i = 0; i < 100; ++i) {
@@ -88,11 +88,11 @@ static void BM_ParallelSLEPerRows(benchmark::State& state) {
   }
   // TODO: replace diag(1, 100) with a randomly generated matrix
   for (auto _ : state) {
-    benchmark::DoNotOptimize(parallel_sle_solution_per_rows(matrix, result));
+    benchmark::DoNotOptimize(fast_sle_solution(matrix, result));
   }
 }
 
-BENCHMARK(BM_ParallelSLEPerRows);
+BENCHMARK(BM_FastSLE);
 // Run the benchmark
 
 static void BM_SequentialSLE(benchmark::State& state) {
@@ -114,22 +114,22 @@ static void BM_Rank(benchmark::State& state) {
   Matrix<double> matrix = diag(1.0, 100);
   // TODO: replace diag(1, 100) with a randomly generated matrix
   for (auto _ : state) {
-    benchmark::DoNotOptimize(parallel_rank(matrix));
+    benchmark::DoNotOptimize(rank(matrix));
   }
 }
 
 BENCHMARK(BM_Rank);
 // Run the benchmark
 
-static void BM_ParallelRankPerRows(benchmark::State& state) {
+static void BM_FastRank(benchmark::State& state) {
   Matrix<double> matrix = diag(1.0, 100);
   // TODO: replace diag(1, 100) with a randomly generated matrix
   for (auto _ : state) {
-    benchmark::DoNotOptimize(parallel_rank_per_rows(matrix));
+    benchmark::DoNotOptimize(fast_rank(matrix));
   }
 }
 
-BENCHMARK(BM_ParallelRankPerRows);
+BENCHMARK(BM_FastRank);
 // Run the benchmark
 
 static void BM_SequentialRank(benchmark::State& state) {
