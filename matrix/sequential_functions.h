@@ -99,7 +99,7 @@ Matrix<T> seq_inverse(const Matrix<T>& matrix) {
 }
 
 template <typename T>
-Matrix<T> seq_sle_solution(const Matrix<T> &left_part, const Matrix<T> right_part) {
+Matrix<T> seq_sle_solution(const Matrix<T> &left_part, const Matrix<T>& right_part) {
   auto [left_length, left_width] = left_part.GetShape();
   auto [right_length, right_width] = right_part.GetShape();
   if (left_length != right_length) {
@@ -155,6 +155,27 @@ Matrix<T> seq_sle_solution(const Matrix<T> &left_part, const Matrix<T> right_par
   }
 
   return sle_matrix.get_submatrix(0, left_width - 1, left_width, left_width + right_width - 1);
+}
+
+template <typename T>
+size_t seq_rank(Matrix<T> matrix) {
+  auto [length, width] = matrix.GetShape();
+  size_t row = 0;
+  for (size_t column = 0; column < width; ++column) {
+    size_t first_not_zero = row;
+    while (first_not_zero < length && matrix(first_not_zero, column) == 0) {
+      ++first_not_zero;
+    }
+    if (first_not_zero == length) {
+      continue;
+    }
+    matrix.row_switching(first_not_zero, row);
+    for (size_t i = row + 1; i < length; ++i) {
+      matrix.row_addition(i, row, -matrix(i, column) / matrix(row, column));
+    }
+    ++row;
+  }
+  return row;
 }
 
 template<typename T>
