@@ -328,7 +328,7 @@ Matrix<T> transposed(const Matrix<T> &matrix) {
 
 
 template<typename T>
-Matrix<T> parallel_sle_solution(const Matrix<T>& left_part, const Matrix<T> right_part) {
+Matrix<T> sle_solution(const Matrix<T>& left_part, const Matrix<T>& right_part) {
   int left_length = left_part.GetLength();
   int left_width = left_part.GetWidth();
   int right_length = right_part.GetLength();
@@ -424,7 +424,7 @@ Matrix<T> parallel_sle_solution(const Matrix<T>& left_part, const Matrix<T> righ
 
 
 template<typename T>
-Matrix<T> parallel_sle_solution_per_rows(const Matrix<T>& left_part, const Matrix<T> right_part) {
+Matrix<T> fast_sle_solution(const Matrix<T>& left_part, const Matrix<T>& right_part) {
   int left_length = left_part.GetLength();
   int left_width = left_part.GetWidth();
   int right_length = right_part.GetLength();
@@ -526,23 +526,22 @@ Matrix<T> parallel_sle_solution_per_rows(const Matrix<T>& left_part, const Matri
 
 
 template <typename T>
-size_t parallel_rank(const Matrix<T>& matrix) {
+size_t rank(Matrix<T> matrix) {
   int n_threads = 2;
   std::vector<std::thread> threads;
   threads.reserve(n_threads);
   int width = matrix.GetWidth();
   int length = matrix.GetLength();
-  Matrix<T> temp_matrix = matrix;
   int row = 0;
   for (int column = 0; column < width && row < length; ++column) {
     int to_look_at = (length - 1 - row) / n_threads + ((length - 1 - row) % n_threads == 0 ? 0 : 1);
-    if (temp_matrix(row, column) == 0) {
+    if (matrix(row, column) == 0) {
       std::atomic<int> first_not_zero{ row };
       std::atomic<bool> has_not_zero{ false };
       for (int k = 0; k < n_threads; ++k) {
         threads.emplace_back([&](int id) {
           for (int i = row + 1 + id * to_look_at; i < length && i < row + 1 + (id + 1)*to_look_at && !has_not_zero.load(); ++i) {
-            if (temp_matrix(i, column) != 0) {
+            if (matrix(i, column) != 0) {
               has_not_zero.store(true);
               first_not_zero.store(i);
               break;
@@ -557,12 +556,12 @@ size_t parallel_rank(const Matrix<T>& matrix) {
       if (!has_not_zero.load()) {
         continue;
       }
-      temp_matrix.row_switching(first_not_zero.load(), row);
+      matrix.row_switching(first_not_zero.load(), row);
     }
     for (int k = 0; k < n_threads; ++k) {
       threads.emplace_back([&](int id) {
         for (int i = row + 1 + id * to_look_at; i < length && i < row + 1 + (id + 1)*to_look_at; ++i) {
-          temp_matrix.row_addition(i, row, -temp_matrix(i, column) / temp_matrix(row, column));
+          matrix.row_addition(i, row, -matrix(i, column) / matrix(row, column));
         }
       }, k);
     }
@@ -570,7 +569,6 @@ size_t parallel_rank(const Matrix<T>& matrix) {
       t.join();
     }
     threads.clear();
-    temp_matrix.row_multiplication(row, 1 / temp_matrix(row, column));
     ++row;
   }
   return row;
@@ -578,10 +576,9 @@ size_t parallel_rank(const Matrix<T>& matrix) {
 
 
 template <typename T>
-size_t parallel_rank_per_rows(const Matrix<T>& matrix) {
+size_t fast_rank(Matrix<T> matrix) {
   int width = matrix.GetWidth();
   int length = matrix.GetLength();
-  Matrix<T> temp_matrix = matrix;
   std::atomic<size_t> result{0};
   std::vector<std::atomic<int>> sequence(width);
   for (size_t i = 0; i < size_t(width); ++i) {
@@ -600,7 +597,7 @@ size_t parallel_rank_per_rows(const Matrix<T>& matrix) {
       int pos = 0;
       int needed_val = -1;
       while (pos < width) {
-        if (std::abs(temp_matrix(id, pos)) > 1e-10 && sequence[pos].compare_exchange_weak(needed_val, id)) {
+        if (std::abs(matrix(id, pos)) > 1e-10 && sequence[pos].compare_exchange_weak(needed_val, id)) {
           result.fetch_add(1);
           break;
         }
@@ -613,7 +610,7 @@ size_t parallel_rank_per_rows(const Matrix<T>& matrix) {
           }
         }
         if (sequence[pos].load() != -1)
-          temp_matrix.row_addition(id, sequence[pos].load(), -temp_matrix(id, pos) / temp_matrix(sequence[pos].load(), pos));
+          matrix.row_addition(id, sequence[pos].load(), -matrix(id, pos) / matrix(sequence[pos].load(), pos));
         ++pos;
         needed_val = -1;
       }
