@@ -43,7 +43,7 @@ TEST(SeqFuncs, SimpleInverse) {
   ASSERT_EQ(seq_inverse(matrix), expected);
 }
 
-TEST(SeqFuncs, Sle_3_inf) {
+TEST(SeqFuncs, SleSolution_3_inf) {
   Matrix<double> matrix_1({{2, -3, 1}, {3, -5, 5}, {5, -8, 6}});
   Matrix<double> matrix_2({{2}, {3}, {5}});
   Matrix<double> expected(0, 0);
@@ -51,7 +51,7 @@ TEST(SeqFuncs, Sle_3_inf) {
   ASSERT_EQ(expected, res);
 }
 
-TEST(SeqFuncs, Sle_3_no_solution) {
+TEST(SeqFuncs, SleSolution_3_no_solution) {
   Matrix<double> matrix_1({{5, -6, 1}, {3, -5, -2}, {2, -1, 3}});
   Matrix<double> matrix_2({{4}, {3}, {5}});
   Matrix<double> expected(0, 0);
@@ -59,7 +59,7 @@ TEST(SeqFuncs, Sle_3_no_solution) {
   ASSERT_EQ(expected, res);
 }
 
-TEST(SeqFuncs, Sle_3) {
+TEST(SeqFuncs, SleSolution_3) {
   Matrix<double> matrix_1({{2, 3, 5}, {3, 7, 4}, {1, 2, 2}});
   Matrix<double> matrix_2({{10}, {3}, {3}});
   Matrix<double> expected({{3}, {-2}, {2}});
@@ -67,7 +67,7 @@ TEST(SeqFuncs, Sle_3) {
   ASSERT_EQ(expected, res);
 }
 
-TEST(SeqFuncs, Sle_4) {
+TEST(SeqFuncs, SleSolution_4) {
   Matrix<double> matrix_1({ {3, -2, -5, 1}, {2, -3, 1, 5}, {1, 2, 0, -4}, {1, -1, -4, 9 } });
   Matrix<double> matrix_2({ {3}, {-3}, {-3}, {22} });
   Matrix<double> expected({ {-1}, {3}, {-2}, {2} });
@@ -75,7 +75,7 @@ TEST(SeqFuncs, Sle_4) {
   ASSERT_EQ(expected, res);
 }
 
-TEST(SeqFuncs, Sle_5) {
+TEST(SeqFuncs, SleSolution_5) {
   Matrix<double> matrix_1({ {1, 1, 4, 4, 9}, {2, 2, 17, 17, 82}, {2, 0, 3, -1, 4}, {0, 1, 4, 12, 27}, {1, 2, 2, 10, 0} });
   Matrix<double> matrix_2({ {-9}, {-146}, {-10}, {-26}, {37} });
   Matrix<double> expected({ {5}, {4}, {-3}, {3}, {-2} });
@@ -83,7 +83,7 @@ TEST(SeqFuncs, Sle_5) {
   ASSERT_EQ(expected, res);
 }
 
-TEST(SeqFuncs, Sle_5_dif_shape) {
+TEST(SeqFuncs, SleSolution_5_dif_shape) {
   Matrix<double> matrix_1({ {1, 1, 4, 4, 9}, {2, 2, 17, 17, 82}, {2, 0, 3, -1, 4}, {0, 1, 4, 12, 27}, {1, 2, 2, 10, 0}, {2, 2, 8, 8, 18} });
   Matrix<double> matrix_2({ {-9}, {-146}, {-10}, {-26}, {37}, {-18} });
   Matrix<double> expected({ {5}, {4}, {-3}, {3}, {-2} });
@@ -91,7 +91,7 @@ TEST(SeqFuncs, Sle_5_dif_shape) {
   ASSERT_EQ(expected, res);
 }
 
-TEST(SeqFuncs, Sle_big) {
+TEST(SeqFuncs, SleSolution_big) {
   int size = 100;
   double val = 2.;
   Matrix<double> big_matrix = diag(val, size);
