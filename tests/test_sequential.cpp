@@ -115,7 +115,6 @@ TEST(SeqFuncs, SleSolution_big) {
   ASSERT_EQ(expected, res);
 }
 
-<<<<<<< HEAD
 TEST(SeqFuncs, TransposeSquare_small) {
   Matrix<int> matrix_1({{1, 2, 3},
                         {4, 5, 6},
