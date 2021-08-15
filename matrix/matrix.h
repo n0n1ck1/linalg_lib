@@ -9,6 +9,8 @@
 #include<thread>
 #include<utility>
 #include<vector>
+#include<random>
+#include<iomanip>
 
 template <typename T>
 class Matrix {
@@ -53,12 +55,13 @@ public:
     }
   }
 
-  explicit Matrix(const size_t& h, const size_t& w) {  // ошибка: неоднозначно задается Matrix<double>({{0},{0}}) - не распознает, это конструктор от vector<vector> или от двух size_t
+  explicit Matrix(const size_t& h, const size_t& w) {
     T default_value = T();
     width_ = w;
     length_ = h;
     matrix_ = std::vector<T>(h * w, default_value);
   }
+
   Matrix(const size_t& n) : Matrix(n, n) {}
 
   Matrix(const Matrix& other) {
@@ -132,14 +135,6 @@ public:
     for (auto& t : threads) {
       t.join();
     }
-
-//    оставил seq-версию для сравнений и замечаний
-//    for (size_t i = start_row; i < end_row + 1; ++i) {
-//      for (size_t j = start_column; j < end_column + 1; ++j) {
-//        matrix(i - start_row, j - start_column) = matrix_[i * width_ + j];
-//      }
-//    }
-
     return matrix;
   }
 
@@ -296,15 +291,87 @@ public:
   }
 
 
+
   void transpose() {
-    Matrix<T> res(width_, length_);
     size_t n_threads = 2;
     std::vector<std::thread> threads;
+
+    if (length_ == width_) {  // интуитивный алгоритм для квадратных матриц
+      for (size_t k = 0; k < n_threads; ++k) {
+        std::vector<std::atomic<bool>> unused(matrix_.size());
+        for (size_t i = 0; i < matrix_.size(); ++i) {
+          unused[i].store(true);
+        }
+        threads.emplace_back([&] (size_t id) {
+          for (size_t i = id * length_ / n_threads; i < (id + 1) * length_ / n_threads; ++i) {
+            for (size_t j = 0; j < width_; ++j) {
+//              #1
+              if (i < j) {
+                std::swap(matrix_[i * width_ + j], matrix_[j * length_ + i]);
+              }
+
+//              #2 - сравню по эффективности, когда добавлю бенчмарки
+//              if (unused[j * length_ + i].exchange(false) && unused[i * width_ + j].exchange(false)) {
+//                std::swap(matrix_[i * width_ + j], matrix_[j * length_ + i]);
+//              }
+            }
+          }
+        }, k);
+      }
+      for (auto& t: threads) {
+        t.join();
+      }
+    } else if (length_ > 1 && width_ > 1) {  // эффективно для прямоугольных матриц
+      n_threads = 2;  // я придумал только для 2-х тредов, потом, может, подумаю, как сделать для n
+      for (size_t k = 0; k < n_threads; ++k) {
+        threads.emplace_back([&] (size_t id) {
+          size_t start = id + 1;
+          size_t i = start;
+          do {
+            i = (i / width_) + (i % width_) * length_;
+            std::swap(matrix_[start], matrix_[i]);
+          } while (i != start);
+        }, k);
+      }
+      for (auto& t: threads) {
+        t.join();
+      }
+      std::swap(length_, width_);
+    }
+
+
+//    Matrix<T> res(width_, length_);
+//    size_t n_threads = 2;
+//    std::vector<std::thread> threads;
+//    for (size_t k = 0; k < n_threads; ++k) {
+//      threads.emplace_back([&] (size_t id) {
+//        for (size_t i = id * width_ / n_threads; i < (id + 1) * width_ / n_threads; ++i) {
+//          for (size_t j = 0; j < length_; ++j) {
+//            res(i, j) = matrix_[j * width_ + i];
+//          }
+//        }
+//      }, k);
+//    }
+//    for (auto& t: threads) {
+//      t.join();
+//    }
+//    *this = res;
+  }
+
+
+  void fill_random(const T& range_low, const T& range_high) {
+    size_t n_threads = 2;
+    std::vector<std::thread> threads;
+
+    static std::random_device rd;
+    static std::mt19937 gen(rd());
+    std::uniform_real_distribution<> distrib(range_low, range_high);
+
     for (size_t k = 0; k < n_threads; ++k) {
       threads.emplace_back([&] (size_t id) {
-        for (size_t i = id * width_ / n_threads; i < (id + 1) * width_ / n_threads; ++i) {
-          for (size_t j = 0; j < length_; ++j) {
-            res(i, j) = matrix_[j * width_ + i];
+        for (size_t i = id * length_ / n_threads; i < (id + 1) * length_ / n_threads; ++i) {
+          for (size_t j = 0; j < width_; ++j) {
+            matrix_[i * width_ + j] = distrib(gen);
           }
         }
       }, k);
@@ -312,7 +379,6 @@ public:
     for (auto& t: threads) {
       t.join();
     }
-    *this = res;
   }
 
 
@@ -333,7 +399,7 @@ std::ostream& operator<<(std::ostream& out, const Matrix<T>& matrix) {
       if (j != 0) {
         out << "\t";
       }
-      out << matrix(i, j);
+      out << std::fixed << std::setprecision(5) << matrix(i, j);
     }
     out << "\n";
   }

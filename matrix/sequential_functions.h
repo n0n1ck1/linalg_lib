@@ -241,3 +241,14 @@ Matrix<T> seq_scale(T scale, const Matrix<T>& matrix) {
   }
   return res;
 }
+
+template<typename T>
+Matrix<T> seq_transposed(const Matrix<T>& matrix) {
+  auto [length, width] = matrix.GetShape();
+  Matrix<T> res(width, length);
+  for (size_t i = 0; i < length; ++i) {
+    for (size_t j = 0; j < width; ++j) {
+      res(i, j) = matrix(j, i);
+    }
+  }
+}
