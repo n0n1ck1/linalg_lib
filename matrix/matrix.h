@@ -326,26 +326,8 @@ public:
       for (auto& t: threads) {
         t.join();
       }
-      std::swap(length_, width_);
     }
-
-
-//    Matrix<T> res(width_, length_);
-//    size_t n_threads = 2;
-//    std::vector<std::thread> threads;
-//    for (size_t k = 0; k < n_threads; ++k) {
-//      threads.emplace_back([&] (size_t id) {
-//        for (size_t i = id * width_ / n_threads; i < (id + 1) * width_ / n_threads; ++i) {
-//          for (size_t j = 0; j < length_; ++j) {
-//            res(i, j) = matrix_[j * width_ + i];
-//          }
-//        }
-//      }, k);
-//    }
-//    for (auto& t: threads) {
-//      t.join();
-//    }
-//    *this = res;
+    std::swap(length_, width_);
   }
 
 
