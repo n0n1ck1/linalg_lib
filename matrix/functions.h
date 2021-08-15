@@ -186,7 +186,7 @@ Matrix<T> diag_from_vector(const std::vector<T> vector) {
 }
 
 
-template<typename T>
+template<typename T=double>
 Matrix<T> random_matrix(const size_t& h, const size_t& w, const T& range_low=0.0, const T& range_high=1.0) {
   Matrix<T> res(h, w);
   res.fill_random(range_low, range_high);

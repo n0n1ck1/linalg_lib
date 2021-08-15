@@ -67,4 +67,40 @@ BENCHMARK(BM_SequentialInverse);
 
 // TODO: add rank function
 
+static void BM_TransposeSquare(benchmark::State& state) {
+  Matrix<double> matrix = random_matrix(100, 100);
+  for (auto _ : state) {
+    benchmark::DoNotOptimize(transposed(matrix));
+  }
+}
+
+BENCHMARK(BM_TransposeSquare);
+
+static void BM_SequentialTransposeSquare(benchmark::State& state) {
+  Matrix<double> matrix = random_matrix(100, 100);
+  for (auto _ : state) {
+    benchmark::DoNotOptimize(seq_transposed(matrix));
+  }
+}
+
+BENCHMARK(BM_SequentialTransposeSquare);
+
+static void BM_TransposeRectangle(benchmark::State& state) {
+  Matrix<double> matrix = random_matrix(100, 200);
+  for (auto _ : state) {
+    benchmark::DoNotOptimize(transposed(matrix));
+  }
+}
+
+BENCHMARK(BM_TransposeRectangle);
+
+static void BM_SequentialTransposeRectangle(benchmark::State& state) {
+  Matrix<double> matrix = random_matrix(100, 200);
+  for (auto _ : state) {
+    benchmark::DoNotOptimize(seq_transposed(matrix));
+  }
+}
+
+BENCHMARK(BM_SequentialTransposeRectangle);
+
 BENCHMARK_MAIN();

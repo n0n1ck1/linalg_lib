@@ -298,22 +298,12 @@ public:
 
     if (length_ == width_) {  // интуитивный алгоритм для квадратных матриц
       for (size_t k = 0; k < n_threads; ++k) {
-        std::vector<std::atomic<bool>> unused(matrix_.size());
-        for (size_t i = 0; i < matrix_.size(); ++i) {
-          unused[i].store(true);
-        }
         threads.emplace_back([&] (size_t id) {
           for (size_t i = id * length_ / n_threads; i < (id + 1) * length_ / n_threads; ++i) {
             for (size_t j = 0; j < width_; ++j) {
-//              #1
               if (i < j) {
                 std::swap(matrix_[i * width_ + j], matrix_[j * length_ + i]);
               }
-
-//              #2 - сравню по эффективности, когда добавлю бенчмарки
-//              if (unused[j * length_ + i].exchange(false) && unused[i * width_ + j].exchange(false)) {
-//                std::swap(matrix_[i * width_ + j], matrix_[j * length_ + i]);
-//              }
             }
           }
         }, k);
