@@ -114,3 +114,33 @@ TEST(SeqFuncs, Sle_big){
   Matrix<double> res = seq_sle_solution(big_matrix, big_matrix_res);
   ASSERT_EQ(expected, res);
 }
+
+TEST(SeqFuncs, TransposeSquare_small) {
+  Matrix<int> matrix_1({{1, 2, 3},
+                        {4, 5, 6},
+                        {7, 8, 9}});
+  Matrix<int> matrix_2({{1, 4, 7},
+                        {2, 5, 8},
+                        {3, 6, 9}});
+  matrix_1 = seq_transposed(matrix_1);
+  ASSERT_EQ(matrix_1, matrix_2);
+}
+
+TEST(SeqFuncs, TransposeSquare_big) {
+  Matrix<int> matrix_1 = diag(1, 500);
+  Matrix<int> matrix_2 = seq_transposed(matrix_1);
+  ASSERT_EQ(matrix_1, matrix_2);
+}
+
+TEST(SeqFuncs, TransposeRectangle_small) {
+
+  Matrix<int> matrix_1({{1, 2, 3, 4},
+                        {5, 6, 7, 8},
+                        {9, 10, 11, 12}});
+  Matrix<int> matrix_2({{1, 5, 9},
+                        {2, 6, 10},
+                        {3, 7, 11},
+                        {4, 8, 12}});
+  matrix_1 = seq_transposed(matrix_1);
+  ASSERT_EQ(matrix_1, matrix_2);
+}

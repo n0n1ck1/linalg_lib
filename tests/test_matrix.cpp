@@ -279,3 +279,32 @@ TEST(Matrix, ParallelSlePerRows_zero) {
   Matrix<double> res = parallel_sle_solution_per_rows(matrix_1, matrix_2);
   ASSERT_EQ(expected, res);
 }
+
+TEST(Matrix, TransposeSquare_small) {
+  Matrix<int> matrix_1({{1, 2, 3},
+                        {4, 5, 6},
+                        {7, 8, 9}});
+  Matrix<int> matrix_2({{1, 4, 7},
+                        {2, 5, 8},
+                        {3, 6, 9}});
+  matrix_1.transpose();
+  ASSERT_EQ(matrix_1, matrix_2);
+}
+
+TEST(Matrix, TransposeSquare_big) {
+  Matrix<int> matrix_1 = diag(1, 500);
+  Matrix<int> matrix_2 = transposed(matrix_1);
+  ASSERT_EQ(matrix_1, matrix_2);
+}
+
+TEST(Matrix, TransposeRectangle_small) {
+  Matrix<int> matrix_1({{1, 2, 3, 4},
+                        {5, 6, 7, 8},
+                        {9, 10, 11, 12}});
+  Matrix<int> matrix_2({{1, 5, 9},
+                        {2, 6, 10},
+                        {3, 7, 11},
+                        {4, 8, 12}});
+  matrix_1.transpose();
+  ASSERT_EQ(matrix_1, matrix_2);
+}

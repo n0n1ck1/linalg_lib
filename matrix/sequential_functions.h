@@ -246,9 +246,10 @@ template<typename T>
 Matrix<T> seq_transposed(const Matrix<T>& matrix) {
   auto [length, width] = matrix.GetShape();
   Matrix<T> res(width, length);
-  for (size_t i = 0; i < length; ++i) {
-    for (size_t j = 0; j < width; ++j) {
+  for (size_t i = 0; i < width; ++i) {
+    for (size_t j = 0; j < length; ++j) {
       res(i, j) = matrix(j, i);
     }
   }
+  return res;
 }
