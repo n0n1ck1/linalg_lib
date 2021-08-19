@@ -291,7 +291,6 @@ public:
   }
 
 
-
   void transpose() {
     size_t n_threads = 2;
     std::vector<std::thread> threads;
@@ -312,15 +311,36 @@ public:
         t.join();
       }
     } else if (length_ > 1 && width_ > 1) {  // эффективно для прямоугольных матриц
-      n_threads = 2;  // я придумал только для 2-х тредов, потом, может, подумаю, как сделать для n
+      std::vector<size_t> cycles;                        // не вышло сделать полностью in-place
+      std::vector<bool> visited(matrix_.size(), false);  // вектор visited нужен, чтобы найти циклы в перестановке
+      for (size_t i = 0; i < matrix_.size(); ++i) {
+        if (!visited[i]) {
+          visited[i] = true;
+          cycles.push_back(i);
+          for (size_t j = (i / width_) + (i % width_) * length_; j != i;
+               j = (j / width_) + (j % width_) * length_) {
+            visited[j] = true;
+          }
+        }
+      }
+      std::vector<std::atomic<bool>> used(cycles.size());
+      for (size_t i = 0; i < cycles.size(); ++i) {
+        used[i].store(false);
+      }
+
       for (size_t k = 0; k < n_threads; ++k) {
         threads.emplace_back([&] (size_t id) {
-          size_t start = id + 1;
-          size_t i = start;
-          do {
-            i = (i / width_) + (i % width_) * length_;
-            std::swap(matrix_[start], matrix_[i]);
-          } while (i != start);
+          while (true) {
+            for (; id < cycles.size() && used[id].exchange(true); ++id);  // находим неиспользованный цикл
+            if (id >= cycles.size()) {
+              break;
+            }
+            size_t i = cycles[id];
+            do {
+              i = (i / width_) + (i % width_) * length_;
+              std::swap(matrix_[cycles[id]], matrix_[i]);
+            } while (i != cycles[id]);
+          }
         }, k);
       }
       for (auto& t: threads) {

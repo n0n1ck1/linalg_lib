@@ -297,7 +297,7 @@ TEST(Matrix, TransposeSquare_big) {
   ASSERT_EQ(matrix_1, matrix_2);
 }
 
-TEST(Matrix, TransposeRectangle_small) {
+TEST(Matrix, TransposeRectangle_small1) {
   Matrix<int> matrix_1({{1, 2, 3, 4},
                         {5, 6, 7, 8},
                         {9, 10, 11, 12}});
@@ -307,6 +307,18 @@ TEST(Matrix, TransposeRectangle_small) {
                         {4, 8, 12}});
   matrix_1.transpose();
   ASSERT_EQ(matrix_1, matrix_2);
+}
+
+TEST(Matrix, TransposeRectangle_small2) {
+  Matrix<double> matrix_1({{1, 2, 3, 4},
+                           {5, 6, 7, 8}});
+  Matrix<double> matrix_2({{1, 5},
+                           {2, 6},
+                           {3, 7},
+                           {4, 8}});
+  matrix_1.transpose();
+  ASSERT_EQ(matrix_1, matrix_2);
+
 }
 
 TEST(Matrix, Rank) {
