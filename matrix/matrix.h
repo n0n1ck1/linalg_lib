@@ -9,6 +9,8 @@
 #include<thread>
 #include<utility>
 #include<vector>
+#include<random>
+#include<iomanip>
 
 template <typename T>
 class Matrix {
@@ -53,12 +55,13 @@ public:
     }
   }
 
-  explicit Matrix(const size_t& h, const size_t& w) {  // ошибка: неоднозначно задается Matrix<double>({{0},{0}}) - не распознает, это конструктор от vector<vector> или от двух size_t
+  explicit Matrix(const size_t& h, const size_t& w) {
     T default_value = T();
     width_ = w;
     length_ = h;
     matrix_ = std::vector<T>(h * w, default_value);
   }
+
   Matrix(const size_t& n) : Matrix(n, n) {}
 
   Matrix(const Matrix& other) {
@@ -132,14 +135,6 @@ public:
     for (auto& t : threads) {
       t.join();
     }
-
-//    оставил seq-версию для сравнений и замечаний
-//    for (size_t i = start_row; i < end_row + 1; ++i) {
-//      for (size_t j = start_column; j < end_column + 1; ++j) {
-//        matrix(i - start_row, j - start_column) = matrix_[i * width_ + j];
-//      }
-//    }
-
     return matrix;
   }
 
@@ -297,14 +292,78 @@ public:
 
 
   void transpose() {
-    Matrix<T> res(width_, length_);
     size_t n_threads = 2;
     std::vector<std::thread> threads;
+
+    if (length_ == width_) {  // интуитивный алгоритм для квадратных матриц
+      for (size_t k = 0; k < n_threads; ++k) {
+        threads.emplace_back([&] (size_t id) {
+          for (size_t i = id * length_ / n_threads; i < (id + 1) * length_ / n_threads; ++i) {
+            for (size_t j = 0; j < width_; ++j) {
+              if (i < j) {
+                std::swap(matrix_[i * width_ + j], matrix_[j * length_ + i]);
+              }
+            }
+          }
+        }, k);
+      }
+      for (auto& t: threads) {
+        t.join();
+      }
+    } else if (length_ > 1 && width_ > 1) {  // эффективно для прямоугольных матриц
+      std::vector<size_t> cycles;                        // не вышло сделать полностью in-place
+      std::vector<bool> visited(matrix_.size(), false);  // вектор visited нужен, чтобы найти циклы в перестановке
+      for (size_t i = 0; i < matrix_.size(); ++i) {
+        if (!visited[i]) {
+          visited[i] = true;
+          cycles.push_back(i);
+          for (size_t j = (i / width_) + (i % width_) * length_; j != i;
+               j = (j / width_) + (j % width_) * length_) {
+            visited[j] = true;
+          }
+        }
+      }
+      std::vector<std::atomic<bool>> used(cycles.size());
+      for (size_t i = 0; i < cycles.size(); ++i) {
+        used[i].store(false);
+      }
+
+      for (size_t k = 0; k < n_threads; ++k) {
+        threads.emplace_back([&] (size_t id) {
+          while (true) {
+            for (; id < cycles.size() && used[id].exchange(true); ++id);  // находим неиспользованный цикл
+            if (id >= cycles.size()) {
+              break;
+            }
+            size_t i = cycles[id];
+            do {
+              i = (i / width_) + (i % width_) * length_;
+              std::swap(matrix_[cycles[id]], matrix_[i]);
+            } while (i != cycles[id]);
+          }
+        }, k);
+      }
+      for (auto& t: threads) {
+        t.join();
+      }
+    }
+    std::swap(length_, width_);
+  }
+
+
+  void fill_random(const T& range_low, const T& range_high) {
+    size_t n_threads = 2;
+    std::vector<std::thread> threads;
+
+    static std::random_device rd;
+    static std::mt19937 gen(rd());
+    std::uniform_real_distribution<> distrib(range_low, range_high);
+
     for (size_t k = 0; k < n_threads; ++k) {
       threads.emplace_back([&] (size_t id) {
-        for (size_t i = id * width_ / n_threads; i < (id + 1) * width_ / n_threads; ++i) {
-          for (size_t j = 0; j < length_; ++j) {
-            res(i, j) = matrix_[j * width_ + i];
+        for (size_t i = id * length_ / n_threads; i < (id + 1) * length_ / n_threads; ++i) {
+          for (size_t j = 0; j < width_; ++j) {
+            matrix_[i * width_ + j] = distrib(gen);
           }
         }
       }, k);
@@ -312,7 +371,6 @@ public:
     for (auto& t: threads) {
       t.join();
     }
-    *this = res;
   }
 
 
@@ -333,7 +391,7 @@ std::ostream& operator<<(std::ostream& out, const Matrix<T>& matrix) {
       if (j != 0) {
         out << "\t";
       }
-      out << matrix(i, j);
+      out << std::fixed << std::setprecision(5) << matrix(i, j);
     }
     out << "\n";
   }

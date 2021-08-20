@@ -174,6 +174,7 @@ Matrix<T> diag(const T& elem, const size_t& size) {
   return res;
 }
 
+
 template<typename T>
 Matrix<T> diag_from_vector(const std::vector<T> vector) {
   size_t size = vector.size();
@@ -181,6 +182,14 @@ Matrix<T> diag_from_vector(const std::vector<T> vector) {
   for (size_t i = 0; i < size; ++i) {
     res(i, i) = vector[i];
   }
+  return res;
+}
+
+
+template<typename T=double>
+Matrix<T> random_matrix(const size_t& h, const size_t& w, const T& range_low=0.0, const T& range_high=1.0) {
+  Matrix<T> res(h, w);
+  res.fill_random(range_low, range_high);
   return res;
 }
 

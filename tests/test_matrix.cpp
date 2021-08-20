@@ -280,6 +280,47 @@ TEST(Matrix, FastSleSolution_zero) {
   ASSERT_EQ(expected, res);
 }
 
+TEST(Matrix, TransposeSquare_small) {
+  Matrix<int> matrix_1({{1, 2, 3},
+                        {4, 5, 6},
+                        {7, 8, 9}});
+  Matrix<int> matrix_2({{1, 4, 7},
+                        {2, 5, 8},
+                        {3, 6, 9}});
+  matrix_1.transpose();
+  ASSERT_EQ(matrix_1, matrix_2);
+}
+
+TEST(Matrix, TransposeSquare_big) {
+  Matrix<int> matrix_1 = diag(1, 500);
+  Matrix<int> matrix_2 = transposed(matrix_1);
+  ASSERT_EQ(matrix_1, matrix_2);
+}
+
+TEST(Matrix, TransposeRectangle_small1) {
+  Matrix<int> matrix_1({{1, 2, 3, 4},
+                        {5, 6, 7, 8},
+                        {9, 10, 11, 12}});
+  Matrix<int> matrix_2({{1, 5, 9},
+                        {2, 6, 10},
+                        {3, 7, 11},
+                        {4, 8, 12}});
+  matrix_1.transpose();
+  ASSERT_EQ(matrix_1, matrix_2);
+}
+
+TEST(Matrix, TransposeRectangle_small2) {
+  Matrix<double> matrix_1({{1, 2, 3, 4},
+                           {5, 6, 7, 8}});
+  Matrix<double> matrix_2({{1, 5},
+                           {2, 6},
+                           {3, 7},
+                           {4, 8}});
+  matrix_1.transpose();
+  ASSERT_EQ(matrix_1, matrix_2);
+
+}
+
 TEST(Matrix, Rank) {
   std::vector<size_t> expected({0, 0, 0, 1, 2, 3, 3, 3, 1, 2, 2, 2, 2, 1});
   std::vector<size_t> result;
