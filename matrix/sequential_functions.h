@@ -5,8 +5,9 @@
 
 template<typename T>
 Matrix<T> seq_dot(const Matrix<T>& left, const Matrix<T>& right) {
-  if (!(left.GetWidth() == right.GetLength())) {
-    throw std::length_error("Left width (" + std::to_string(left.GetWidth()) + ") and right length (" + std::to_string(right.GetLength()) + ") are not equal.");
+  if (left.GetWidth() != right.GetLength()) {
+    throw std::length_error("Left width (" + std::to_string(left.GetWidth()) + ") and right length (" +
+                                             std::to_string(right.GetLength()) + ") are not equal");
   }
   size_t width = right.GetWidth();
   size_t length = left.GetLength();
@@ -27,8 +28,7 @@ T seq_det(Matrix<T> matrix) {
   size_t width = matrix.GetWidth();
   size_t length = matrix.GetLength();
   if (width != length) {
-      throw "The matrix isn't a square";
-      return static_cast<T>(0);
+      throw std::length_error("The matrix isn't a square");
   }
   T res = static_cast<T>(1);
   for (size_t i = 0; i < width - 1; ++i) {
@@ -60,8 +60,7 @@ T seq_det(Matrix<T> matrix) {
 template<typename T>
 Matrix<T> seq_inverse(const Matrix<T>& matrix) {
   if (matrix.GetWidth() != matrix.GetLength()) {
-    throw "The matrix ins't a square";
-    return Matrix<T>();
+    throw std::length_error("The matrix isn't a square");
   }
   size_t width = matrix.GetWidth();
   Matrix<T> sle = concatenate(matrix, diag(static_cast<T>(1.0), width), 1);
@@ -76,8 +75,7 @@ Matrix<T> seq_inverse(const Matrix<T>& matrix) {
         }
       }
       if (!has_non_zero) {
-        throw "Determinant equals 0, inverse matrix doesn't exist";
-        return Matrix<T>();
+        throw std::invalid_argument("Determinant equals 0, inverse matrix doesn't exist");
       }
       sle.row_switching(i, index_non_zero);
     }
@@ -86,10 +84,9 @@ Matrix<T> seq_inverse(const Matrix<T>& matrix) {
     }
   }
   if (sle(width - 1, width - 1) == 0) {
-    throw "Determinant equals 0, inverse matrix doesn't exist";
-    return Matrix<T>();
+    throw std::invalid_argument("Determinant equals 0, inverse matrix doesn't exist");
   }
-  for (long long int i = width - 1; i >= 0; --i) {
+  for (long long int i = static_cast<long long>(width) - 1; i >= 0; --i) {
     sle.row_multiplication(i, 1 / sle(i, i));
     for (long long int j = 0; j < i; ++j) {
       sle.row_addition(j, i, -sle(j, i));
@@ -99,11 +96,11 @@ Matrix<T> seq_inverse(const Matrix<T>& matrix) {
 }
 
 template <typename T>
-Matrix<T> seq_sle_solution(const Matrix<T> &left_part, const Matrix<T>& right_part) {
+Matrix<T> seq_sle_solution(const Matrix<T>& left_part, const Matrix<T>& right_part) {
   auto [left_length, left_width] = left_part.GetShape();
   auto [right_length, right_width] = right_part.GetShape();
   if (left_length != right_length) {
-    throw std::length_error("Shapes do not match.");
+    throw std::length_error("Shapes do not match");
   }
   Matrix<T> sle_matrix = concatenate(left_part, right_part, 1);
   //size_t length = left_width;
@@ -187,12 +184,12 @@ Matrix<T> seq_add(const Matrix<T>& matrix1, const Matrix<T>& matrix2) {
   size_t length = matrix1.GetLength();
   Matrix<T> res(length, width);
   size_t n_threads = 2;
-  size_t to_look_at = (length*width) / n_threads + ((length*width) % n_threads == 0 ? 0 : 1);
+  size_t to_look_at = (length * width) / n_threads + ((length * width) % n_threads == 0 ? 0 : 1);
   std::vector<std::thread> threads;
   for (size_t k = 0; k < n_threads; ++k) {
-    threads.emplace_back([&](size_t id) {
-      for (size_t i = to_look_at * id; i < length*width && i < to_look_at*(id + 1); ++i) {
-        res(i / width, i%width) = matrix1(i / width, i%width) + matrix2(i / width, i%width);
+    threads.emplace_back([&] (size_t id) {
+      for (size_t i = to_look_at * id; i < length * width && i < to_look_at * (id + 1); ++i) {
+        res(i / width, i % width) = matrix1(i / width, i % width) + matrix2(i / width, i % width);
       }
     }, k);
   }

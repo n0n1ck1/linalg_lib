@@ -96,6 +96,11 @@ Matrix<T> operator*(const T& scale, const Matrix<T>& matrix) {
   return res;
 }
 
+template<typename T>
+Matrix<T> operator*(const Matrix<T>& matrix, const T& scale) {
+  return scale * matrix;
+}
+
 
 template<typename T>
 Matrix<T> operator/(const Matrix<T>& matrix1, const Matrix<T>& matrix2) {
@@ -106,12 +111,12 @@ Matrix<T> operator/(const Matrix<T>& matrix1, const Matrix<T>& matrix2) {
   size_t length = matrix1.GetLength();
   Matrix<T> res(length, width);
   size_t n_threads = 2;
-  size_t to_look_at = (length*width) / n_threads + ((length*width) % n_threads == 0 ? 0 : 1);
+  size_t to_look_at = (length * width) / n_threads + ((length * width) % n_threads == 0 ? 0 : 1);
   std::vector<std::thread> threads;
   for (size_t k = 0; k < n_threads; ++k) {
-    threads.emplace_back([&](size_t id) {
-      for (size_t i = to_look_at * id; i < length*width && i < to_look_at*(id + 1); ++i) {
-        res(i / width, i%width) = matrix1(i / width, i%width) / matrix2(i / width, i%width);
+    threads.emplace_back([&] (size_t id) {
+      for (size_t i = to_look_at * id; i < length * width && i < to_look_at * (id + 1); ++i) {
+        res(i / width, i % width) = matrix1(i / width, i % width) / matrix2(i / width, i % width);
       }
     }, k);
   }
@@ -124,8 +129,9 @@ Matrix<T> operator/(const Matrix<T>& matrix1, const Matrix<T>& matrix2) {
 
 template<typename T>
 Matrix<T> dot(const Matrix<T>& left, const Matrix<T>& right) {
-  if (!(left.GetWidth() == right.GetLength())) {
-    throw std::length_error("Left width (" + std::to_string(left.GetWidth()) + ") and right length (" + std::to_string(right.GetLength()) + ") are not equal.");
+  if (left.GetWidth() != right.GetLength()) {
+    throw std::length_error("Left width (" + std::to_string(left.GetWidth()) + ") and right length (" +
+                                             std::to_string(right.GetLength()) + ") are not equal");
   }
   size_t n_threads = 2;
   size_t width = right.GetWidth();
@@ -158,7 +164,7 @@ Matrix<T> operator^(const Matrix<T>& matrix1, const Matrix<T>& matrix2) {
 
 
 template<typename T>
-Matrix<T> concatenate(const Matrix<T>& matrix1, const Matrix<T>& matrix2, size_t axis = 0) {
+Matrix<T> concatenate(const Matrix<T>& matrix1, const Matrix<T>& matrix2, size_t axis=0) {
   Matrix<T> new_matrix = matrix1;
   new_matrix.concatenate(matrix2, axis);
   return new_matrix;
@@ -187,7 +193,8 @@ Matrix<T> diag_from_vector(const std::vector<T> vector) {
 
 
 template<typename T=double>
-Matrix<T> random_matrix(const size_t& h, const size_t& w, const T& range_low=0.0, const T& range_high=1.0) {
+Matrix<T> random_matrix(const size_t& h, const size_t& w,
+                        const T& range_low=0.0, const T& range_high=1.0) {
   Matrix<T> res(h, w);
   res.fill_random(range_low, range_high);
   return res;
@@ -199,7 +206,7 @@ T det(Matrix<T> matrix) {
     size_t width = matrix.GetWidth();
     size_t length = matrix.GetLength();
     if (width != length) {
-        throw "The matrix isn't a square";
+        throw std::length_error("The matrix isn't a square");
     }
     T res = static_cast<T>(1);
     size_t n_threads = 2;
@@ -210,9 +217,10 @@ T det(Matrix<T> matrix) {
             bool has_non_zero = false;
             size_t index_non_zero;
             for (size_t k = 0; k < n_threads; ++k) {
-                threads.emplace_back([&](const size_t& id){
+                threads.emplace_back([&] (const size_t& id){
                     // divide the rows in range [i, width] evenly between all threads
-                    for (size_t j = i + id * (width - i ) / n_threads; j < i + (id + 1) * (width - i) / n_threads; ++j) {
+                    for (size_t j = i + id * (width - i ) / n_threads;
+                         j < i + (id + 1) * (width - i) / n_threads; ++j) {
                         if (matrix(j, i) != 0) {
                             has_non_zero = true;
                             index_non_zero = j;
@@ -239,7 +247,8 @@ T det(Matrix<T> matrix) {
         });
         for (size_t k = 1; k < n_threads; ++k) {
             threads.emplace_back([&](const size_t& id) {
-                for (size_t j = std::max(i + id * (width - i) / n_threads, i + 1); j < i + (id + 1) * (width - i) / n_threads; ++j) {
+                for (size_t j = std::max(i + id * (width - i) / n_threads, i + 1);
+                     j < i + (id + 1) * (width - i) / n_threads; ++j) {
                     matrix.row_addition(j, i, static_cast<T>(-1) * matrix(j, i) / matrix(i, i));
                 }
             }, k);
@@ -258,7 +267,7 @@ T det(Matrix<T> matrix) {
 template<typename T>
 Matrix<T> inverse(const Matrix<T>& matrix) {
   if (matrix.GetWidth() != matrix.GetLength()) {
-    throw "The matrix isn't a square";
+    throw std::length_error("The matrix isn't a square");
   }
   size_t width = matrix.GetWidth();
   Matrix<T> sle = concatenate(matrix, diag(1.0, width), 1);
@@ -272,7 +281,8 @@ Matrix<T> inverse(const Matrix<T>& matrix) {
       for (size_t k = 0; k < n_threads; ++k) {
         threads.emplace_back([&](const size_t& id) {
           // divide the rows in range [i, width] evenly between all threads
-          for (size_t j = i + id * (width - i ) / n_threads; j < i + (id + 1) * (width - i) / n_threads; ++j) {
+          for (size_t j = i + id * (width - i ) / n_threads;
+               j < i + (id + 1) * (width - i) / n_threads; ++j) {
             if (sle(j, i) != 0) {
               has_non_zero = true;
               index_non_zero = j;
@@ -285,7 +295,7 @@ Matrix<T> inverse(const Matrix<T>& matrix) {
         t.join();
       }
       if (!has_non_zero) {
-        throw "Determinant equals 0, inverse matrix doesn't exist";
+        throw std::invalid_argument("Determinant equals 0, inverse matrix doesn't exist");
       }
       sle.row_switching(i, index_non_zero);
     }
@@ -297,8 +307,9 @@ Matrix<T> inverse(const Matrix<T>& matrix) {
       }
     });
     for (size_t k = 1; k < n_threads; ++k) {
-      threads.emplace_back([&](const size_t& id) {
-        for (size_t j = std::max(i + id * (width - i) / n_threads, i + 1); j < i + (id + 1) * (width - i) / n_threads; ++j) {
+      threads.emplace_back([&] (const size_t& id) {
+        for (size_t j = std::max(i + id * (width - i) / n_threads, i + 1);
+             j < i + (id + 1) * (width - i) / n_threads; ++j) {
           sle.row_addition(j, i, static_cast<T>(-1) * sle(j, i) / sle(i, i));
         }
       }, k);
@@ -308,13 +319,13 @@ Matrix<T> inverse(const Matrix<T>& matrix) {
     }
   }
   if (sle(width - 1, width - 1) == 0) {
-    throw "Determinant equals 0, inverse matrix doesn't exist";
+    throw std::invalid_argument("Determinant equals 0, inverse matrix doesn't exist");
   }
-  for (long long int i = width - 1; i >= 0; --i) {
+  for (long long int i = static_cast<long long>(width) - 1; i >= 0; --i) {
     sle.row_multiplication(i, 1 / sle(i, i));
     threads.clear();
     for (size_t k = 0; k < n_threads; ++k) {
-      threads.emplace_back([&](const size_t& id) {
+      threads.emplace_back([&] (const size_t& id) {
         for (size_t j = id * i / n_threads; j < (id + 1) * i / n_threads; ++j) {
           sle.row_addition(j, i, -sle(j, i));
         }
@@ -343,7 +354,7 @@ Matrix<T> sle_solution(const Matrix<T>& left_part, const Matrix<T>& right_part) 
   int right_length = right_part.GetLength();
   int right_width = right_part.GetWidth();
   if (left_length != right_length) {
-    throw std::length_error("Shapes do not match.");
+    throw std::length_error("Shapes do not match");
   }
   Matrix<T> sle_matrix = concatenate(left_part, right_part, 1);
   int n_threads = 2;
@@ -358,8 +369,9 @@ Matrix<T> sle_solution(const Matrix<T>& left_part, const Matrix<T>& right_part) 
       std::atomic<int> first_not_zero{ i };
       std::atomic<bool> has_not_zero{ false };
       for (int k = 0; k < n_threads; ++k) {
-        threads.emplace_back([&](int id) {
-          for (int j = i + 1 + id * to_look_at; j < left_length && j < i + 1 + (id + 1)*to_look_at && !has_not_zero.load(); ++j) {
+        threads.emplace_back([&] (int id) {
+          for (int j = i + 1 + id * to_look_at;
+               j < left_length && j < i + 1 + (id + 1) * to_look_at && !has_not_zero.load(); ++j) {
             if (sle_matrix(j, i) != 0) {
               has_not_zero.store(true);
               first_not_zero.store(j);
@@ -373,13 +385,13 @@ Matrix<T> sle_solution(const Matrix<T>& left_part, const Matrix<T>& right_part) 
       }
       threads.clear();
       if (!has_not_zero.load()) {
-        return Matrix<T>(0, 0);// inf or no solution
+        return Matrix<T>(0, 0);  // inf or no solution
       }
       sle_matrix.row_switching(i, first_not_zero.load());
     }
     for (int k = 0; k < n_threads; ++k) {
-      threads.emplace_back([&](int id) {
-        for (int j = i + 1 + id * to_look_at; j < left_length && j < i + 1 + (id + 1)*to_look_at; ++j) {
+      threads.emplace_back([&] (int id) {
+        for (int j = i + 1 + id * to_look_at; j < left_length && j < i + 1 + (id + 1) * to_look_at; ++j) {
           sle_matrix.row_addition(j, i, -sle_matrix(j, i) / sle_matrix(i, i));
         }
       }, k);
@@ -394,8 +406,9 @@ Matrix<T> sle_solution(const Matrix<T>& left_part, const Matrix<T>& right_part) 
     int to_look_at = (left_length - left_width) / n_threads + ((left_length - left_width) % n_threads == 0 ? 0 : 1);
     std::atomic<bool> do_not_have_solution{ false };
     for (int k = 0; k < n_threads; ++k) {
-      threads.emplace_back([&](int id) {
-        for (int i = left_width + id * to_look_at; i < left_length && i < left_width + (id + 1)*to_look_at && !do_not_have_solution.load(); ++i) {
+      threads.emplace_back([&] (int id) {
+        for (int i = left_width + id * to_look_at;
+             i < left_length && i < left_width + (id + 1) * to_look_at && !do_not_have_solution.load(); ++i) {
           for (int j = 0; j < left_width + right_width && !do_not_have_solution.load(); ++j) {
             if (sle_matrix(i, j) != 0) {
               do_not_have_solution.store(true);
@@ -417,8 +430,8 @@ Matrix<T> sle_solution(const Matrix<T>& left_part, const Matrix<T>& right_part) 
   for (int i = left_width - 1; i != -1; --i) {
     int to_look_at = i / n_threads + (i % n_threads == 0 ? 0 : 1);
     for (int k = 0; k < n_threads; ++k) {
-      threads.emplace_back([&](int id) {
-        for (int j = id * to_look_at; j < i && j < (id + 1)*to_look_at; ++j) {
+      threads.emplace_back([&] (int id) {
+        for (int j = id * to_look_at; j < i && j < (id + 1) * to_look_at; ++j) {
           sle_matrix.row_addition(j, i, -sle_matrix(j, i));
         }
       }, k);
@@ -439,7 +452,7 @@ Matrix<T> fast_sle_solution(const Matrix<T>& left_part, const Matrix<T>& right_p
   int right_length = right_part.GetLength();
   int right_width = right_part.GetWidth();
   if (left_length != right_length) {
-    throw std::length_error("Shapes do not match.");
+    throw std::length_error("Shapes do not match");
   }
   int length = left_width;
   int width = right_width;
@@ -477,14 +490,15 @@ Matrix<T> fast_sle_solution(const Matrix<T>& left_part, const Matrix<T>& right_p
           while (phase[0].load() < pos + 1) {
             std::this_thread::yield();
             if (phase[0].load() + waiting[pos].load() == left_length && phase[0].load() < pos + 1) {
-              inf_solution.store(true);// inf or no solution
+              inf_solution.store(true);  // inf or no solution
               break;
             }
           }
           if (inf_solution.load()) {
             break;
           }
-          sle_matrix.row_addition(id, sequence[pos].load(), -sle_matrix(id, pos) / sle_matrix(sequence[pos].load(), pos));
+          sle_matrix.row_addition(id, sequence[pos].load(),
+                                  -sle_matrix(id, pos) / sle_matrix(sequence[pos].load(), pos));
           ++pos;
           needed_val = -1;
         }
@@ -494,9 +508,10 @@ Matrix<T> fast_sle_solution(const Matrix<T>& left_part, const Matrix<T>& right_p
         }
         if (!inf_solution.load() && !do_not_have_solution.load()) {
           if (pos == left_width) {
-            for (int j = 0; j < left_width + right_width && !inf_solution.load() && !do_not_have_solution.load(); ++j) {
+            for (int j = 0; j < left_width + right_width &&
+                            !inf_solution.load() && !do_not_have_solution.load(); ++j) {
               if (std::abs(sle_matrix(id, j)) > 1e-10) {
-                do_not_have_solution.store(true);// no solution
+                do_not_have_solution.store(true);  // no solution
                 break;
               }
             }
@@ -549,7 +564,8 @@ size_t rank(Matrix<T> matrix) {
       std::atomic<bool> has_not_zero{ false };
       for (int k = 0; k < n_threads; ++k) {
         threads.emplace_back([&](int id) {
-          for (int i = row + 1 + id * to_look_at; i < length && i < row + 1 + (id + 1)*to_look_at && !has_not_zero.load(); ++i) {
+          for (int i = row + 1 + id * to_look_at;
+               i < length && i < row + 1 + (id + 1) * to_look_at && !has_not_zero.load(); ++i) {
             if (matrix(i, column) != 0) {
               has_not_zero.store(true);
               first_not_zero.store(i);
@@ -569,7 +585,7 @@ size_t rank(Matrix<T> matrix) {
     }
     for (int k = 0; k < n_threads; ++k) {
       threads.emplace_back([&](int id) {
-        for (int i = row + 1 + id * to_look_at; i < length && i < row + 1 + (id + 1)*to_look_at; ++i) {
+        for (int i = row + 1 + id * to_look_at; i < length && i < row + 1 + (id + 1) * to_look_at; ++i) {
           matrix.row_addition(i, row, -matrix(i, column) / matrix(row, column));
         }
       }, k);
@@ -598,11 +614,11 @@ size_t fast_rank(Matrix<T> matrix) {
   for (size_t i = 0; i < size_t(width); ++i) {
     waiting[i].store(0);
   }
-  std::atomic<int> faild_attempt{0};
+  std::atomic<int> failed_attempt{0};
   std::vector<std::thread> threads;
   threads.reserve(length);
   for (int i = 0; i < length; ++i) {
-    threads.emplace_back([&](int id) {
+    threads.emplace_back([&] (int id) {
       int pos = 0;
       int needed_val = -1;
       while (pos < width) {
@@ -611,10 +627,11 @@ size_t fast_rank(Matrix<T> matrix) {
           break;
         }
         waiting[pos].fetch_add(1);
-        while (counter.load() + faild_attempt.load() < pos + 1) {
+        while (counter.load() + failed_attempt.load() < pos + 1) {
           std::this_thread::yield();
-          if (counter.load() + waiting[pos].load() == length && counter.load() + faild_attempt.load() < pos + 1) {
-            faild_attempt.fetch_add(1);
+          if (counter.load() + waiting[pos].load() == length &&
+              counter.load() + failed_attempt.load() < pos + 1) {
+            failed_attempt.fetch_add(1);
             break;
           }
         }

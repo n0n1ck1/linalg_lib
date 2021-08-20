@@ -19,6 +19,7 @@ public:
     width_ = 0;
     length_ = 0;
   }
+
   Matrix(const std::vector<std::vector<T>>& matrix) {
     if (matrix.empty()) {
       width_ = 0;
@@ -28,7 +29,7 @@ public:
     else {
       width_ = matrix[0].size();
       length_ = matrix.size();
-      matrix_.resize(width_*length_);
+      matrix_.resize(width_ * length_);
       for (size_t i = 0; i < length_; ++i) {
         for (size_t j = 0; j < width_; ++j) {
           matrix_[i*width_ + j] = matrix[i][j];
@@ -46,10 +47,10 @@ public:
     else {
       width_ = matrix[0].size();
       length_ = matrix.size();
-      matrix_.resize(width_*length_);
+      matrix_.resize(width_ * length_);
       for (size_t i = 0; i < length_; ++i) {
         for (size_t j = 0; j < width_; ++j) {
-          matrix_[i*width_ + j] = matrix[i][j];
+          matrix_[i * width_ + j] = matrix[i][j];
         }
       }
     }
@@ -62,7 +63,7 @@ public:
     matrix_ = std::vector<T>(h * w, default_value);
   }
 
-  Matrix(const size_t& n) : Matrix(n, n) {}
+  explicit Matrix(const size_t& n) : Matrix(n, n) {}
 
   Matrix(const Matrix& other) {
     matrix_ = other.matrix_;
@@ -80,9 +81,11 @@ public:
   size_t GetWidth() const {
     return width_;
   }
+
   size_t GetLength() const {
     return length_;
   }
+
   std::pair<size_t, size_t> GetShape() const {
     return std::make_pair(length_, width_);
   }
@@ -99,7 +102,7 @@ public:
   Matrix get_row(const size_t& row) const {
     Matrix matrix(1, width_);
     for (size_t i = 0; i < width_; ++i) {
-      matrix(0, i) = matrix_[row*width_ + i];
+      matrix(0, i) = matrix_[row * width_ + i];
     }
     return matrix;
   }
@@ -107,18 +110,18 @@ public:
   Matrix get_column(const size_t& column) const {
     Matrix matrix(length_, 1);
     for (size_t i = 0; i < length_; ++i) {
-      matrix(i, 0) = matrix_[column + i*width_];
+      matrix(i, 0) = matrix_[column + i * width_];
     }
     return matrix;
   }
 
-  Matrix get_submatrix(const size_t& start_row, const size_t& end_row, const size_t& start_column, const size_t& end_column) const {
+  Matrix get_submatrix(const size_t& start_row, const size_t& end_row,
+                       const size_t& start_column, const size_t& end_column) const {
     if (!(width_ > end_column && length_ > end_row)) {
-      throw std::out_of_range("Specified submatrix doesn't exist.");
+      throw std::out_of_range("Specified submatrix doesn't exist");
     }
 
     Matrix matrix(end_row - start_row + 1, end_column - start_column + 1);
-
     size_t n_threads = 2;
     size_t new_width = matrix.width_;
     size_t new_length = matrix.length_;
@@ -161,7 +164,8 @@ public:
     double eps = 1e-4;
     for (size_t i = 0; i < length_ && almost_equal; ++i) {
       for (size_t j = 0; j < width_; ++j) {
-        if (double(1)*std::abs(matrix_[i*width_ + j] - other.matrix_[i*width_ + j]) / std::abs(other.matrix_[i*width_ + j]) > eps) {
+        if (double(1) * std::abs(matrix_[i * width_ + j] - other.matrix_[i * width_ + j]) /
+            std::abs(other.matrix_[i * width_ + j]) > eps) {
           almost_equal = false;
           break;
         }
@@ -210,31 +214,32 @@ public:
     return *this;
   }
 
+
   Matrix& concatenate(const Matrix& other, size_t axis = 0) {
     if (axis == 0) {
-      if (!(width_ == other.width_)) {
-        throw std::length_error("Different shapes.");
+      if (width_ != other.width_) {
+        throw std::length_error("Different shapes");
       }
-      std::vector<T> new_matrix(length_*width_ + other.length_*other.width_);
-      for (size_t i = 0; i < length_*width_; ++i) {
+      std::vector<T> new_matrix(length_ * width_ + other.length_ * other.width_);
+      for (size_t i = 0; i < length_ * width_; ++i) {
         new_matrix[i] = matrix_[i];
       }
-      for (size_t i = 0; i < other.length_*other.width_; ++i) {
+      for (size_t i = 0; i < other.length_ * other.width_; ++i) {
         new_matrix[i + length_ * width_] = other.matrix_[i];
       }
       matrix_ = new_matrix;
       length_ += other.length_;
     }
     else {
-      if (!(length_ == other.length_)) {
-        throw std::length_error("Different shapes.");
+      if (length_ != other.length_) {
+        throw std::length_error("Different shapes");
       }
-      std::vector<T> new_matrix(length_*width_ + other.length_*other.width_);
-      for (size_t i = 0; i < length_*width_; ++i) {
-        new_matrix[(i / width_)*(width_ + other.width_) + i % width_] = matrix_[i];
+      std::vector<T> new_matrix(length_ * width_ + other.length_ * other.width_);
+      for (size_t i = 0; i < length_ * width_; ++i) {
+        new_matrix[(i / width_) * (width_ + other.width_) + i % width_] = matrix_[i];
       }
-      for (size_t i = 0; i < other.length_*other.width_; ++i) {
-        new_matrix[(i / other.width_)*(width_ + other.width_) + width_ + i % other.width_] = other.matrix_[i];
+      for (size_t i = 0; i < other.length_ * other.width_; ++i) {
+        new_matrix[(i / other.width_) * (width_ + other.width_) + width_ + i % other.width_] = other.matrix_[i];
       }
       matrix_ = new_matrix;
       width_ += other.width_;
@@ -242,15 +247,13 @@ public:
     return *this;
   }
 
-
   bool empty() const {
     return matrix_.empty();
   }
 
-
   Matrix& row_addition(size_t i, size_t j, T k) {
     for (size_t x = 0; x < width_; ++x) {
-      matrix_[i*width_ + x] += k * matrix_[j*width_ + x];
+      matrix_[i * width_ + x] += k * matrix_[j * width_ + x];
     }
     return *this;
   }
@@ -264,7 +267,7 @@ public:
 
   Matrix& row_switching(size_t i, size_t j) {
     for (size_t x = 0; x < width_; ++x) {
-      std::swap(matrix_[i*width_ + x], matrix_[j*width_ + x]);
+      std::swap(matrix_[i * width_ + x], matrix_[j * width_ + x]);
     }
     return *this;
   }
