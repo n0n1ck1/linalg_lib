@@ -11,12 +11,12 @@ Matrix<T> operator+(const Matrix<T>& matrix1, const Matrix<T>& matrix2) {
   size_t length = matrix1.GetLength();
   Matrix<T> res(length, width);
   size_t n_threads = 2;
-  size_t to_look_at = (length*width) / n_threads + ((length*width) % n_threads == 0 ? 0 : 1);
+  size_t to_look_at = (length * width) / n_threads + ((length * width) % n_threads == 0 ? 0 : 1);
   std::vector<std::thread> threads;
   for (size_t k = 0; k < n_threads; ++k) {
-    threads.emplace_back([&](size_t id) {
-      for (size_t i = to_look_at * id; i < length*width && i < to_look_at*(id + 1); ++i) {
-        res(i / width, i%width) = matrix1(i / width, i%width) + matrix2(i / width, i%width);
+    threads.emplace_back([&] (size_t id) {
+      for (size_t i = to_look_at * id; i < length * width && i < to_look_at * (id + 1); ++i) {
+        res(i / width, i % width) = matrix1(i / width, i % width) + matrix2(i / width, i % width);
       }
     }, k);
   }
@@ -35,12 +35,12 @@ Matrix<T> operator-(const Matrix<T>& matrix1, const Matrix<T>& matrix2) {
   size_t length = matrix1.GetLength();
   Matrix<T> res(length, width);
   size_t n_threads = 2;
-  size_t to_look_at = (length*width) / n_threads + ((length*width) % n_threads == 0 ? 0 : 1);
+  size_t to_look_at = (length * width) / n_threads + ((length * width) % n_threads == 0 ? 0 : 1);
   std::vector<std::thread> threads;
   for (size_t k = 0; k < n_threads; ++k) {
-    threads.emplace_back([&](size_t id) {
-      for (size_t i = to_look_at * id; i < length*width && i < to_look_at*(id + 1); ++i) {
-        res(i / width, i%width) = matrix1(i / width, i%width) - matrix2(i / width, i%width);
+    threads.emplace_back([&] (size_t id) {
+      for (size_t i = to_look_at * id; i < length * width && i < to_look_at * (id + 1); ++i) {
+        res(i / width, i % width) = matrix1(i / width, i % width) - matrix2(i / width, i % width);
       }
     }, k);
   }
@@ -60,12 +60,12 @@ Matrix<T> operator*(const Matrix<T>& matrix1, const Matrix<T>& matrix2) {
   size_t length = matrix1.GetLength();
   Matrix<T> res(length, width);
   size_t n_threads = 2;
-  size_t to_look_at = (length*width) / n_threads + ((length*width) % n_threads == 0 ? 0 : 1);
+  size_t to_look_at = (length * width) / n_threads + ((length * width) % n_threads == 0 ? 0 : 1);
   std::vector<std::thread> threads;
   for (size_t k = 0; k < n_threads; ++k) {
-    threads.emplace_back([&](size_t id) {
-      for (size_t i = to_look_at * id; i < length*width && i < to_look_at*(id + 1); ++i) {
-        res(i / width, i%width) = matrix1(i / width, i%width) * matrix2(i / width, i%width);
+    threads.emplace_back([&] (size_t id) {
+      for (size_t i = to_look_at * id; i < length*width && i < to_look_at * (id + 1); ++i) {
+        res(i / width, i % width) = matrix1(i / width, i % width) * matrix2(i / width, i % width);
       }
     }, k);
   }
@@ -81,11 +81,11 @@ Matrix<T> operator*(const T& scale, const Matrix<T>& matrix) {
   size_t length = matrix.GetLength();
   Matrix<T> res(length, width);
   size_t n_threads = 2;
-  size_t to_look_at = (length*width) / n_threads + ((length*width) % n_threads == 0 ? 0 : 1);
+  size_t to_look_at = (length * width) / n_threads + ((length * width) % n_threads == 0 ? 0 : 1);
   std::vector<std::thread> threads;
   for (size_t k = 0; k < n_threads; ++k) {
-    threads.emplace_back([&](size_t id) {
-      for (size_t i = to_look_at * id; i < length*width && i < to_look_at*(id + 1); ++i) {
+    threads.emplace_back([&] (size_t id) {
+      for (size_t i = to_look_at * id; i < length * width && i < to_look_at * (id + 1); ++i) {
         res(i / width, i % width) = matrix(i / width, i % width) * scale;
       }
     }, k);
@@ -140,7 +140,7 @@ Matrix<T> dot(const Matrix<T>& left, const Matrix<T>& right) {
   Matrix<T> res(length, width);
   std::vector<std::thread> threads;
   for (size_t k = 0; k < n_threads; ++k) {
-    threads.emplace_back([&](const size_t& id) {
+    threads.emplace_back([&] (const size_t& id) {
       for (size_t i = id * width / n_threads; i < (id + 1) * width / n_threads; ++i) {
         for (size_t j = 0; j < length; ++j) {
           for (size_t p = 0; p < count_iter; ++p) {
@@ -173,7 +173,7 @@ Matrix<T> concatenate(const Matrix<T>& matrix1, const Matrix<T>& matrix2, size_t
 
 template<typename T>
 Matrix<T> diag(const T& elem, const size_t& size) {
-  Matrix<T> res(size, size);
+  Matrix<T> res(size);
   for (size_t i = 0; i < size; ++i) {
     res(i, i) = elem;
   }
@@ -184,7 +184,7 @@ Matrix<T> diag(const T& elem, const size_t& size) {
 template<typename T>
 Matrix<T> diag_from_vector(const std::vector<T> vector) {
   size_t size = vector.size();
-  Matrix<T> res(size, size);
+  Matrix<T> res(size);
   for (size_t i = 0; i < size; ++i) {
     res(i, i) = vector[i];
   }

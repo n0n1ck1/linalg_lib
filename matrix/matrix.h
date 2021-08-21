@@ -215,7 +215,7 @@ public:
   }
 
 
-  Matrix& concatenate(const Matrix& other, size_t axis = 0) {
+  Matrix& concatenate(const Matrix& other, size_t axis=0) {
     if (axis == 0) {
       if (width_ != other.width_) {
         throw std::length_error("Different shapes");
